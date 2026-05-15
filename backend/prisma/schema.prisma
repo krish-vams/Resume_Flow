@@ -9,6 +9,8 @@ datasource db {
 
 enum JobStatus {
   SAVED
+  RESUME_NEEDED
+  RESUME_GENERATED
   GENERATED
   APPLIED
   RECRUITER_REACHED_OUT
@@ -92,6 +94,7 @@ model Job {
   jobTitle                   String
   location                   String?
   jobUrl                     String?
+  jobType                    String?
   jobDescription             String
   seniorityLevel             String?
   requiredSkillsJson         Json?

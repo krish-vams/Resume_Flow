@@ -22,7 +22,15 @@ Acceptance criteria:
 - Add candidate profile CRUD.
 - Capture contact details, education, certifications, and default resume name.
 
-## Phase 2: Job and Resume Storage
+## Phase 2: Job Description Manager
+
+- Add protected job CRUD.
+- Store company, role, URL, location, job type, full JD, and notes.
+- Show saved jobs in a table with status, date added, recommended focus, and resume count.
+- Add a job detail page with JD, notes, status, generated resume count, eligibility placeholder, and focus placeholder.
+- Keep all jobs scoped to the logged-in user.
+
+## Phase 3: Job and Resume Storage
 
 - Add authentication.
 - Add job description CRUD.
@@ -31,20 +39,20 @@ Acceptance criteria:
 - Store formatted resume metadata.
 - Link resume versions to jobs.
 
-## Phase 3: Prompt Library
+## Phase 4: Prompt Library
 
 - Store Gemini prompts.
 - Add prompt versioning.
 - Assemble final prompt with JD and profile data.
 - Store prompt used for each resume version.
 
-## Phase 4: Resume Library and Application Tracker
+## Phase 5: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 5: Resume Validator
+## Phase 6: Resume Validator
 
 - Add eligibility checks.
 - Validate summary word count.
@@ -52,13 +60,13 @@ Acceptance criteria:
 - Validate skills sections.
 - Add basic JD keyword matching.
 
-## Phase 6: Focus Templates and Auto Detection
+## Phase 7: Focus Templates and Auto Detection
 
 - Add focus template storage.
 - Recommend focus from JD keywords.
 - Store focus used for each generated resume.
 
-## Phase 7: Direct Gemini Integration
+## Phase 8: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

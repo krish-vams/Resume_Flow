@@ -88,3 +88,11 @@ npm run prisma:validate
 - Protected `GET /api/auth/me`
 - Protected candidate profile CRUD
 - Frontend pages for register, login, dashboard, and profile settings
+
+## Phase 2 Scope
+
+- Protected job description CRUD
+- User-scoped job list and detail pages
+- Job status tracking from saved through offer or withdrawn
+- Job metadata fields for URL, location, type, description, and notes
+- Resume count and future analysis placeholders on job detail

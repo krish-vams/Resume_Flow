@@ -52,6 +52,15 @@ export default function DashboardPage() {
       <section className="mx-auto grid max-w-7xl gap-4 px-5 py-6 md:grid-cols-2">
         <Link
           className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/jobs"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Jobs</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Save job descriptions, track status, and keep each generated resume connected to its source JD.
+          </p>
+        </Link>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
           href="/settings/profile"
         >
           <h2 className="text-lg font-semibold text-[#17212b]">Candidate profile</h2>

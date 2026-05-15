@@ -80,3 +80,11 @@ npm run prisma:validate
 - Prisma schema for core ResumeFlow OS entities
 - Docker Compose for PostgreSQL, Redis, backend, and formatter service
 - Shared environment sample
+
+## Phase 1 Scope
+
+- User registration with hashed passwords
+- User login with JWT issued as an HttpOnly cookie
+- Protected `GET /api/auth/me`
+- Protected candidate profile CRUD
+- Frontend pages for register, login, dashboard, and profile settings

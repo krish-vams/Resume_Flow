@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   WandSparkles,
 } from "lucide-react";
+import Link from "next/link";
 
 const stats = [
   { label: "Jobs saved", value: "0" },
@@ -68,10 +69,13 @@ export default function Home() {
                 Application workflow dashboard
               </h1>
             </div>
-            <button className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[#264653] px-4 text-sm font-medium text-white transition hover:bg-[#1f3944] sm:w-auto">
+            <Link
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[#264653] px-4 text-sm font-medium text-white transition hover:bg-[#1f3944] sm:w-auto"
+              href="/dashboard"
+            >
               <BriefcaseBusiness size={17} aria-hidden="true" />
-              Add job
-            </button>
+              Open dashboard
+            </Link>
           </header>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

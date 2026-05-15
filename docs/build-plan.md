@@ -13,7 +13,16 @@ Acceptance criteria:
 - Prisma validates against PostgreSQL configuration.
 - `.env.example` exists.
 
-## Phase 1: Job and Resume Storage
+## Phase 1: Authentication and Candidate Profile
+
+- Add registration with bcrypt password hashing.
+- Add login with JWT auth.
+- Store JWT in an HttpOnly cookie for browser clients.
+- Add protected API middleware.
+- Add candidate profile CRUD.
+- Capture contact details, education, certifications, and default resume name.
+
+## Phase 2: Job and Resume Storage
 
 - Add authentication.
 - Add job description CRUD.
@@ -22,20 +31,20 @@ Acceptance criteria:
 - Store formatted resume metadata.
 - Link resume versions to jobs.
 
-## Phase 2: Prompt Library
+## Phase 3: Prompt Library
 
 - Store Gemini prompts.
 - Add prompt versioning.
 - Assemble final prompt with JD and profile data.
 - Store prompt used for each resume version.
 
-## Phase 3: Resume Library and Application Tracker
+## Phase 4: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 4: Resume Validator
+## Phase 5: Resume Validator
 
 - Add eligibility checks.
 - Validate summary word count.
@@ -43,13 +52,13 @@ Acceptance criteria:
 - Validate skills sections.
 - Add basic JD keyword matching.
 
-## Phase 5: Focus Templates and Auto Detection
+## Phase 6: Focus Templates and Auto Detection
 
 - Add focus template storage.
 - Recommend focus from JD keywords.
 - Store focus used for each generated resume.
 
-## Phase 6: Direct Gemini Integration
+## Phase 7: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

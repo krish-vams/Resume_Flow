@@ -74,6 +74,7 @@ model CandidateProfile {
   githubUrl         String?
   educationJson     Json?
   certificationsJson Json?
+  defaultResumeName String?
   defaultTemplateId String?
   user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   defaultTemplate   ResumeFocusTemplate?  @relation(fields: [defaultTemplateId], references: [id])

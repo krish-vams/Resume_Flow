@@ -39,3 +39,11 @@ Phase 6 stores JD analysis results on `Job`:
 - `jdKeywordsJson`: extracted keywords grouped by focus type.
 - `focusRecommendationJson`: recommended focus, confidence, matched keywords, and reason.
 - `recommendedFocusTemplateId`: selected or manually overridden focus template.
+
+Phase 7 uses `ResumeVersion` for raw Gemini output storage:
+
+- `candidateProfileId`, `promptTemplateId`, and `focusTemplateId` are optional links for manual uploads.
+- `rawResumeFileUrl` stores a private local storage key such as `raw-resumes/<userId>/<filename>.docx`, not a public static path.
+- `rawResumeText` can store pasted raw resume content alongside the uploaded DOCX.
+- `version` increments per job through `@@unique([jobId, version])`.
+- `status` starts as `Raw Uploaded`; formatter and validation phases will update it later.

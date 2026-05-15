@@ -128,3 +128,12 @@ npm run prisma:validate
 - Protected `POST /api/jobs/:id/analyze`
 - Persisted JD keywords, recommendation metadata, and recommended focus template ID
 - Job detail UI for confidence, reason, matched keywords, and manual focus override
+
+## Phase 7 Scope
+
+- Protected raw resume DOCX upload
+- Resume versions linked to jobs, candidate profiles, prompt templates, and focus templates
+- Per-job version numbering for v1, v2, v3 workflows
+- Private local raw resume storage with authenticated download
+- Job detail UI for uploading, viewing, downloading, and deleting raw resume versions
+- Automatic job status update to `RESUME_GENERATED` after upload

@@ -32,9 +32,13 @@ Initial route groups:
 - `PUT /api/focus-templates/:id`
 - `DELETE /api/focus-templates/:id`
 - `POST /api/resumes/upload-raw`
+- `GET /api/resumes`
+- `GET /api/resumes/:id`
+- `GET /api/resumes/:id/download-raw`
+- `DELETE /api/resumes/:id`
 - `POST /api/resumes/:id/validate`
 - `POST /api/resumes/:id/format`
 - `POST /api/applications`
 - `GET /api/applications`
 
-Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Phase 6 implements JD keyword extraction and auto focus detection. Later phases will add resumes and application tracking.
+Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Phase 6 implements JD keyword extraction and auto focus detection. Phase 7 implements raw DOCX resume upload, resume version storage, and authenticated raw resume download. Later phases will add formatter output, validation, and application tracking.

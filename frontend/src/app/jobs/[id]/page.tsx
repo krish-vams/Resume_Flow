@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { apiFetch } from "@/lib/api";
+import { API_URL, apiFetch, apiFormFetch } from "@/lib/api";
 import {
   formatDate,
   formatJobStatus,
@@ -15,6 +15,12 @@ import {
   type JobRecord,
 } from "@/lib/jobs";
 import type { ResumeFocusTemplate } from "@/lib/focus-templates";
+import type { PromptTemplate } from "@/lib/prompts";
+import {
+  formatResumeStatus,
+  type CandidateProfileSummary,
+  type ResumeVersionRecord,
+} from "@/lib/resumes";
 
 function getRouteId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -26,11 +32,15 @@ export default function JobDetailPage() {
   const jobId = getRouteId(params.id);
   const [job, setJob] = useState<JobRecord | null>(null);
   const [focusTemplates, setFocusTemplates] = useState<ResumeFocusTemplate[]>([]);
+  const [candidateProfiles, setCandidateProfiles] = useState<CandidateProfileSummary[]>([]);
+  const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
+  const [resumes, setResumes] = useState<ResumeVersionRecord[]>([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (!jobId) {
@@ -40,10 +50,16 @@ export default function JobDetailPage() {
     Promise.all([
       apiFetch<{ job: JobRecord }>(`/api/jobs/${jobId}`),
       apiFetch<{ focusTemplates: ResumeFocusTemplate[] }>("/api/focus-templates"),
+      apiFetch<{ profiles: CandidateProfileSummary[] }>("/api/candidate-profiles"),
+      apiFetch<{ prompts: PromptTemplate[] }>("/api/prompts"),
+      apiFetch<{ resumes: ResumeVersionRecord[] }>(`/api/resumes?jobId=${jobId}`),
     ])
-      .then(([jobPayload, focusTemplatePayload]) => {
+      .then(([jobPayload, focusTemplatePayload, candidateProfilePayload, promptPayload, resumePayload]) => {
         setJob(jobPayload.job);
         setFocusTemplates(focusTemplatePayload.focusTemplates);
+        setCandidateProfiles(candidateProfilePayload.profiles);
+        setPrompts(promptPayload.prompts);
+        setResumes(resumePayload.resumes);
       })
       .catch(() => router.push("/jobs"))
       .finally(() => setIsLoading(false));
@@ -141,6 +157,96 @@ export default function JobDetailPage() {
     }
   }
 
+  async function handleUploadRawResume(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!job) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setIsUploading(true);
+
+    const uploadForm = event.currentTarget;
+    const formData = new FormData(uploadForm);
+    formData.set("jobId", job.id);
+
+    try {
+      const response = await apiFormFetch<{ resume: ResumeVersionRecord }>("/api/resumes/upload-raw", formData);
+      setResumes((currentResumes) => [response.resume, ...currentResumes]);
+      setJob((currentJob) =>
+        currentJob
+          ? {
+              ...currentJob,
+              status: "RESUME_GENERATED",
+              _count: {
+                ...currentJob._count,
+                resumeVersions: currentJob._count.resumeVersions + 1,
+              },
+            }
+          : currentJob
+      );
+      uploadForm.reset();
+      setMessage(`Raw resume v${response.resume.version} uploaded`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to upload raw resume");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function handleDownloadResume(resume: ResumeVersionRecord) {
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch(`${API_URL}/api/resumes/${resume.id}/download-raw`, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(response.statusText || "Unable to download raw resume");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}-v${resume.version}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to download raw resume");
+    }
+  }
+
+  async function handleDeleteResume(resume: ResumeVersionRecord) {
+    setError("");
+    setMessage("");
+
+    try {
+      await apiFetch(`/api/resumes/${resume.id}`, { method: "DELETE" });
+      setResumes((currentResumes) => currentResumes.filter((currentResume) => currentResume.id !== resume.id));
+      setJob((currentJob) =>
+        currentJob
+          ? {
+              ...currentJob,
+              _count: {
+                ...currentJob._count,
+                resumeVersions: Math.max(0, currentJob._count.resumeVersions - 1),
+              },
+            }
+          : currentJob
+      );
+      setMessage(`Raw resume v${resume.version} deleted`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to delete raw resume");
+    }
+  }
+
   if (isLoading) {
     return <main className="min-h-screen bg-[#f7f7f4] p-6 text-[#1f2933]">Loading...</main>;
   }
@@ -153,6 +259,10 @@ export default function JobDetailPage() {
   const isResumeGenerationBlocked = eligibility.severity === "blocked";
   const focusRecommendation = job.focusRecommendationJson;
   const extractedKeywords = job.jdKeywordsJson;
+  const primaryCandidateProfile = candidateProfiles[0];
+  const defaultResumeName =
+    primaryCandidateProfile?.defaultResumeName ??
+    `${job.companyName}_${job.jobTitle}`.replace(/[^a-zA-Z0-9._-]/g, "_");
 
   return (
     <main className="min-h-screen bg-[#f7f7f4] text-[#1f2933]">
@@ -192,20 +302,139 @@ export default function JobDetailPage() {
           <section className="rounded-md border border-[#d9d6cc] bg-white p-5">
             <h2 className="text-lg font-semibold text-[#17212b]">Generated resumes</h2>
             <p className="mt-2 text-sm text-[#65707a]">
-              {job._count.resumeVersions} resume version{job._count.resumeVersions === 1 ? "" : "s"} linked to this job.
+              {resumes.length} resume version{resumes.length === 1 ? "" : "s"} linked to this job.
             </p>
-            <button
-              className="mt-4 h-10 rounded-md bg-[#264653] px-4 text-sm font-medium text-white hover:bg-[#1f3944] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
-              disabled={isResumeGenerationBlocked}
-              type="button"
-            >
-              Generate resume
-            </button>
+
+            <form className="mt-5 grid gap-4 rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-4 md:grid-cols-2" onSubmit={handleUploadRawResume}>
+              <label className="block text-sm font-medium">
+                Resume Name
+                <input
+                  className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] bg-white px-3 outline-none focus:border-[#264653]"
+                  defaultValue={defaultResumeName}
+                  name="resumeName"
+                  required
+                />
+              </label>
+              <label className="block text-sm font-medium">
+                Raw Resume DOCX
+                <input
+                  accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] bg-white px-3 py-2 text-sm outline-none file:mr-3 file:rounded-md file:border-0 file:bg-[#e8efed] file:px-3 file:py-1 file:text-sm file:font-medium file:text-[#264653]"
+                  name="rawResumeFile"
+                  required
+                  type="file"
+                />
+              </label>
+              <label className="block text-sm font-medium">
+                Candidate Profile
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] bg-white px-3 outline-none focus:border-[#264653]"
+                  defaultValue={primaryCandidateProfile?.id ?? ""}
+                  name="candidateProfileId"
+                >
+                  <option value="">No profile selected</option>
+                  {candidateProfiles.map((profile) => (
+                    <option key={profile.id} value={profile.id}>
+                      {profile.fullName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-medium">
+                Prompt Template
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] bg-white px-3 outline-none focus:border-[#264653]"
+                  name="promptTemplateId"
+                >
+                  <option value="">No prompt selected</option>
+                  {prompts.map((prompt) => (
+                    <option key={prompt.id} value={prompt.id}>
+                      {prompt.name} v{prompt.version}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-medium">
+                Focus Template
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] bg-white px-3 outline-none focus:border-[#264653]"
+                  defaultValue={job.recommendedFocusTemplateId ?? ""}
+                  name="focusTemplateId"
+                >
+                  <option value="">No focus selected</option>
+                  {focusTemplates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-medium md:col-span-2">
+                Raw Resume Text
+                <textarea
+                  className="mt-1 min-h-28 w-full rounded-md border border-[#cfcabf] bg-white px-3 py-2 outline-none focus:border-[#264653]"
+                  name="rawResumeText"
+                />
+              </label>
+              <div className="md:col-span-2">
+                <button
+                  className="h-10 rounded-md bg-[#264653] px-4 text-sm font-medium text-white hover:bg-[#1f3944] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
+                  disabled={isResumeGenerationBlocked || isUploading}
+                  type="submit"
+                >
+                  {isUploading ? "Uploading..." : "Upload raw resume"}
+                </button>
+              </div>
+            </form>
             {isResumeGenerationBlocked ? (
               <p className="mt-3 text-sm leading-6 text-[#b42318]">
                 Resume generation is blocked for this job until a manual override workflow is added.
               </p>
             ) : null}
+            <div className="mt-5 space-y-3">
+              {resumes.length === 0 ? (
+                <p className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-4 text-sm text-[#65707a]">
+                  No raw resumes have been uploaded for this job yet.
+                </p>
+              ) : (
+                resumes.map((resume) => (
+                  <div
+                    className="flex flex-col gap-3 rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-4 sm:flex-row sm:items-center sm:justify-between"
+                    key={resume.id}
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-[#17212b]">
+                        v{resume.version} - {resume.resumeName}
+                      </p>
+                      <p className="mt-1 text-sm text-[#65707a]">
+                        {formatResumeStatus(resume.status)} - {formatDate(resume.createdAt)}
+                      </p>
+                      <p className="mt-1 text-sm text-[#65707a]">
+                        {[resume.candidateProfile?.fullName, resume.promptTemplate?.name, resume.focusTemplate?.name]
+                          .filter(Boolean)
+                          .join(" - ") || "No linked profile, prompt, or focus template"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white"
+                        onClick={() => handleDownloadResume(resume)}
+                        type="button"
+                      >
+                        Download
+                      </button>
+                      <button
+                        className="h-9 rounded-md border border-[#b42318] px-3 text-sm font-medium text-[#b42318] hover:bg-[#fff5f5]"
+                        onClick={() => handleDeleteResume(resume)}
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </section>
         </div>
 

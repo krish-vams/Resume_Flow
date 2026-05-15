@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from "express";
+import multer from "multer";
 import { ZodError } from "zod";
 import { HttpError } from "../utils/http-error";
 
@@ -16,6 +17,16 @@ export const errorMiddleware: ErrorRequestHandler = (error, _request, response, 
       message: error.message,
       details: error.details
     });
+    return;
+  }
+
+  if (error instanceof multer.MulterError) {
+    response.status(400).json({ message: error.message });
+    return;
+  }
+
+  if (error instanceof Error && error.message.includes("file must be")) {
+    response.status(400).json({ message: error.message });
     return;
   }
 

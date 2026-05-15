@@ -50,39 +50,39 @@ enum ReferenceCategory {
 }
 
 model User {
-  id                  String                @id @default(cuid())
-  name                String
-  email               String                @unique
-  passwordHash        String
-  candidateProfiles   CandidateProfile[]
-  jobs                Job[]
-  promptTemplates     PromptTemplate[]
+  id                   String                @id @default(cuid())
+  name                 String
+  email                String                @unique
+  passwordHash         String
+  candidateProfiles    CandidateProfile[]
+  jobs                 Job[]
+  promptTemplates      PromptTemplate[]
   resumeFocusTemplates ResumeFocusTemplate[]
-  referenceFiles      ReferenceFile[]
-  resumeVersions      ResumeVersion[]
-  applications        Application[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  referenceFiles       ReferenceFile[]
+  resumeVersions       ResumeVersion[]
+  applications         Application[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 }
 
 model CandidateProfile {
-  id                String                @id @default(cuid())
-  userId            String
-  fullName          String
-  email             String
-  phone             String?
-  location          String?
-  linkedinUrl       String?
-  githubUrl         String?
-  educationJson     Json?
+  id                 String               @id @default(cuid())
+  userId             String
+  fullName           String
+  email              String
+  phone              String?
+  location           String?
+  linkedinUrl        String?
+  githubUrl          String?
+  educationJson      Json?
   certificationsJson Json?
-  defaultResumeName String?
-  defaultTemplateId String?
-  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  defaultTemplate   ResumeFocusTemplate?  @relation(fields: [defaultTemplateId], references: [id])
-  resumeVersions    ResumeVersion[]
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
+  defaultResumeName  String?
+  defaultTemplateId  String?
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultTemplate    ResumeFocusTemplate? @relation(fields: [defaultTemplateId], references: [id])
+  resumeVersions     ResumeVersion[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   @@index([userId])
 }
@@ -135,22 +135,22 @@ model PromptTemplate {
 }
 
 model ResumeFocusTemplate {
-  id                 String             @id @default(cuid())
-  userId             String
-  name               String
-  focusType          FocusType
-  description        String?
-  primaryLanguage    String?
-  targetRolesJson    Json?
-  baseResumeText     String?
-  baseResumeFileUrl  String?
-  defaultSkillsJson  Json?
-  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  candidateProfiles  CandidateProfile[]
-  recommendedJobs    Job[]
-  resumeVersions     ResumeVersion[]
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id                String             @id @default(cuid())
+  userId            String
+  name              String
+  focusType         FocusType
+  description       String?
+  primaryLanguage   String?
+  targetRolesJson   Json?
+  baseResumeText    String?
+  baseResumeFileUrl String?
+  defaultSkillsJson Json?
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  candidateProfiles CandidateProfile[]
+  recommendedJobs   Job[]
+  resumeVersions    ResumeVersion[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([userId, focusType])
 }
@@ -189,51 +189,52 @@ model ReferenceEntry {
 }
 
 model ResumeVersion {
-  id                  String              @id @default(cuid())
-  userId              String
-  jobId               String
-  candidateProfileId  String
-  promptTemplateId    String?
-  focusTemplateId     String?
-  resumeName          String
-  rawResumeText       String?
-  rawResumeFileUrl    String?
-  formattedDocxUrl    String?
-  formattedPdfUrl     String?
-  version             Int                 @default(1)
-  matchScore          Int?
-  validationStatus    ValidationStatus    @default(NOT_RUN)
-  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  job                 Job                 @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  candidateProfile    CandidateProfile    @relation(fields: [candidateProfileId], references: [id])
-  promptTemplate      PromptTemplate?     @relation(fields: [promptTemplateId], references: [id])
-  focusTemplate       ResumeFocusTemplate? @relation(fields: [focusTemplateId], references: [id])
-  validation          ResumeValidation?
-  applications        Application[]
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  id                 String               @id @default(cuid())
+  userId             String
+  jobId              String
+  candidateProfileId String?
+  promptTemplateId   String?
+  focusTemplateId    String?
+  resumeName         String
+  rawResumeText      String?
+  rawResumeFileUrl   String?
+  formattedDocxUrl   String?
+  formattedPdfUrl    String?
+  version            Int                  @default(1)
+  matchScore         Int?
+  validationStatus   ValidationStatus     @default(NOT_RUN)
+  status             String               @default("Raw Uploaded")
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job                Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateProfile   CandidateProfile?    @relation(fields: [candidateProfileId], references: [id])
+  promptTemplate     PromptTemplate?      @relation(fields: [promptTemplateId], references: [id])
+  focusTemplate      ResumeFocusTemplate? @relation(fields: [focusTemplateId], references: [id])
+  validation         ResumeValidation?
+  applications       Application[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
-  @@index([userId, jobId])
   @@unique([jobId, version])
+  @@index([userId, jobId])
 }
 
 model ResumeValidation {
-  id                          String        @id @default(cuid())
-  resumeVersionId             String        @unique
-  summaryWordCount            Int?
-  accentureBulletCount        Int?
-  dreamsBulletCount           Int?
-  capitalBulletCount          Int?
-  invalidBulletsJson          Json?
-  missingRequiredSkillsJson   Json?
-  missingPreferredSkillsJson  Json?
-  languageRuleViolationsJson  Json?
-  aiToolViolationsJson        Json?
-  boldMarkerViolationsJson    Json?
-  overallScore                Int?
-  overallStatus               ValidationStatus @default(NOT_RUN)
-  resumeVersion               ResumeVersion @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
-  createdAt                   DateTime      @default(now())
+  id                         String           @id @default(cuid())
+  resumeVersionId            String           @unique
+  summaryWordCount           Int?
+  accentureBulletCount       Int?
+  dreamsBulletCount          Int?
+  capitalBulletCount         Int?
+  invalidBulletsJson         Json?
+  missingRequiredSkillsJson  Json?
+  missingPreferredSkillsJson Json?
+  languageRuleViolationsJson Json?
+  aiToolViolationsJson       Json?
+  boldMarkerViolationsJson   Json?
+  overallScore               Int?
+  overallStatus              ValidationStatus @default(NOT_RUN)
+  resumeVersion              ResumeVersion    @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
+  createdAt                  DateTime         @default(now())
 }
 
 model Application {

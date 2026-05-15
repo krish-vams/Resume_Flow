@@ -65,22 +65,30 @@ Acceptance criteria:
 - Store extracted keywords and focus recommendation metadata on the job.
 - Allow manual override of the recommended focus template from the job detail page.
 
-## Phase 7: Job and Resume Storage
+## Phase 7: Raw Resume Upload and Resume Version Storage
 
-- Add authentication.
-- Add job description CRUD.
-- Add raw resume upload.
+- Add protected raw resume DOCX upload.
+- Link each resume version to the user, job, candidate profile, prompt template, and focus template when provided.
+- Store raw resume text, private local file storage key, status, and version metadata.
+- Auto-increment versions per job.
+- Add authenticated raw resume download.
+- Update the linked job to `RESUME_GENERATED` when a raw resume is uploaded.
+- Show upload controls and existing resume versions on the job detail page.
+
+## Phase 8: Formatter Integration and Final Resume Storage
+
 - Call formatter service.
-- Store formatted resume metadata.
-- Link resume versions to jobs.
+- Store formatted DOCX metadata.
+- Add later PDF export path.
+- Track validation and formatter status on resume versions.
 
-## Phase 8: Resume Library and Application Tracker
+## Phase 9: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 9: Resume Validator
+## Phase 10: Resume Validator
 
 - Add eligibility checks.
 - Validate summary word count.
@@ -88,7 +96,7 @@ Acceptance criteria:
 - Validate skills sections.
 - Add basic JD keyword matching.
 
-## Phase 10: Direct Gemini Integration
+## Phase 11: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

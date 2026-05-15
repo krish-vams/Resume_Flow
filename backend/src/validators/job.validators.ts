@@ -17,6 +17,7 @@ export const createJobSchema = z.object({
   jobDescription: z.string().trim().min(1, "Job description is required"),
   notes: z.string().trim().optional(),
   seniorityLevel: z.string().trim().optional(),
+  recommendedFocusTemplateId: z.string().trim().nullable().optional(),
   status: z.nativeEnum(JobStatus).optional()
 });
 

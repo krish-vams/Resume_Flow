@@ -120,3 +120,11 @@ npm run prisma:validate
 - Local focused resume file upload for MVP
 - Target roles, base resume text, and default skills storage
 - Frontend focus template list, create, and detail/edit pages
+
+## Phase 6 Scope
+
+- Keyword-based JD skill extraction
+- Focus recommendation across .NET, Node.js, Golang, AI, Java Backend, Cloud/DevOps, and Full Stack
+- Protected `POST /api/jobs/:id/analyze`
+- Persisted JD keywords, recommendation metadata, and recommended focus template ID
+- Job detail UI for confidence, reason, matched keywords, and manual focus override

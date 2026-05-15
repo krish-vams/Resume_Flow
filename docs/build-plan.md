@@ -56,7 +56,16 @@ Acceptance criteria:
 - Add focus template list, create, and detail/edit pages.
 - Keep focus template IDs ready for future resume generation and resume version records.
 
-## Phase 6: Job and Resume Storage
+## Phase 6: JD Skill Extraction and Auto Focus Detection
+
+- Add keyword-based JD analysis.
+- Extract matched keywords by focus type.
+- Recommend the best available focus template with confidence and reason.
+- Run full analysis through `POST /api/jobs/:id/analyze`.
+- Store extracted keywords and focus recommendation metadata on the job.
+- Allow manual override of the recommended focus template from the job detail page.
+
+## Phase 7: Job and Resume Storage
 
 - Add authentication.
 - Add job description CRUD.
@@ -65,25 +74,19 @@ Acceptance criteria:
 - Store formatted resume metadata.
 - Link resume versions to jobs.
 
-## Phase 7: Resume Library and Application Tracker
+## Phase 8: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 8: Resume Validator
+## Phase 9: Resume Validator
 
 - Add eligibility checks.
 - Validate summary word count.
 - Validate bullet counts and bullet lengths.
 - Validate skills sections.
 - Add basic JD keyword matching.
-
-## Phase 9: Auto Detection
-
-- Add focus template storage.
-- Recommend focus from JD keywords.
-- Store focus used for each generated resume.
 
 ## Phase 10: Direct Gemini Integration
 

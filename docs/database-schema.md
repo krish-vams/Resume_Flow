@@ -33,3 +33,9 @@ Phase 3 stores eligibility gatekeeper results in `Job.eligibilityFlagsJson`:
 Phase 4 uses `PromptTemplate.version` to record the active version number. Editing prompt text increments the version so future resume records can store which version was used.
 
 Phase 5 uses `ResumeFocusTemplate` for stack-specific resume strategy. Target roles and default skills are stored as JSON arrays for MVP flexibility, and uploaded focused resume files are referenced with `baseResumeFileUrl`.
+
+Phase 6 stores JD analysis results on `Job`:
+
+- `jdKeywordsJson`: extracted keywords grouped by focus type.
+- `focusRecommendationJson`: recommended focus, confidence, matched keywords, and reason.
+- `recommendedFocusTemplateId`: selected or manually overridden focus template.

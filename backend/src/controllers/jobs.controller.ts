@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import {
+  analyzeJob,
   analyzeJobEligibility,
   createJob,
   deleteJob,
@@ -48,6 +49,12 @@ export async function updateJobRecord(request: Request, response: Response) {
 
 export async function analyzeJobEligibilityRecord(request: Request, response: Response) {
   const result = await analyzeJobEligibility(request.user!.id, getJobId(request));
+
+  response.json(result);
+}
+
+export async function analyzeJobRecord(request: Request, response: Response) {
+  const result = await analyzeJob(request.user!.id, getJobId(request));
 
   response.json(result);
 }

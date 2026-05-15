@@ -17,6 +17,7 @@ Initial route groups:
 - `GET /api/jobs/:id`
 - `PUT /api/jobs/:id`
 - `DELETE /api/jobs/:id`
+- `POST /api/jobs/:id/analyze`
 - `POST /api/jobs/:id/analyze-eligibility`
 - `POST /api/prompts`
 - `GET /api/prompts`
@@ -36,4 +37,4 @@ Initial route groups:
 - `POST /api/applications`
 - `GET /api/applications`
 
-Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Later phases will add resumes and application tracking.
+Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Phase 6 implements JD keyword extraction and auto focus detection. Later phases will add resumes and application tracking.

@@ -9,9 +9,12 @@ import {
   formatJobStatus,
   getEligibilityFlags,
   jobStatusOptions,
+  type ExtractedKeywords,
   type EligibilityFlags,
+  type FocusRecommendation,
   type JobRecord,
 } from "@/lib/jobs";
+import type { ResumeFocusTemplate } from "@/lib/focus-templates";
 
 function getRouteId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -22,6 +25,7 @@ export default function JobDetailPage() {
   const router = useRouter();
   const jobId = getRouteId(params.id);
   const [job, setJob] = useState<JobRecord | null>(null);
+  const [focusTemplates, setFocusTemplates] = useState<ResumeFocusTemplate[]>([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,8 +37,14 @@ export default function JobDetailPage() {
       return;
     }
 
-    apiFetch<{ job: JobRecord }>(`/api/jobs/${jobId}`)
-      .then((payload) => setJob(payload.job))
+    Promise.all([
+      apiFetch<{ job: JobRecord }>(`/api/jobs/${jobId}`),
+      apiFetch<{ focusTemplates: ResumeFocusTemplate[] }>("/api/focus-templates"),
+    ])
+      .then(([jobPayload, focusTemplatePayload]) => {
+        setJob(jobPayload.job);
+        setFocusTemplates(focusTemplatePayload.focusTemplates);
+      })
       .catch(() => router.push("/jobs"))
       .finally(() => setIsLoading(false));
   }, [jobId, router]);
@@ -58,6 +68,7 @@ export default function JobDetailPage() {
         json: {
           status: formData.get("status"),
           notes: formData.get("notes"),
+          recommendedFocusTemplateId: formData.get("recommendedFocusTemplateId") || null,
         },
       });
       setJob(response.job);
@@ -105,6 +116,31 @@ export default function JobDetailPage() {
     }
   }
 
+  async function handleAnalyzeJob() {
+    if (!job) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setIsAnalyzing(true);
+
+    try {
+      const response = await apiFetch<{
+        eligibility: EligibilityFlags;
+        extractedKeywords: ExtractedKeywords;
+        focusRecommendation: FocusRecommendation;
+        job: JobRecord;
+      }>(`/api/jobs/${job.id}/analyze`, { method: "POST" });
+      setJob(response.job);
+      setMessage(`Recommended focus: ${response.focusRecommendation.recommendedFocus}`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to analyze job");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
   if (isLoading) {
     return <main className="min-h-screen bg-[#f7f7f4] p-6 text-[#1f2933]">Loading...</main>;
   }
@@ -115,6 +151,8 @@ export default function JobDetailPage() {
 
   const eligibility = getEligibilityFlags(job);
   const isResumeGenerationBlocked = eligibility.severity === "blocked";
+  const focusRecommendation = job.focusRecommendationJson;
+  const extractedKeywords = job.jdKeywordsJson;
 
   return (
     <main className="min-h-screen bg-[#f7f7f4] text-[#1f2933]">
@@ -197,6 +235,22 @@ export default function JobDetailPage() {
                   name="notes"
                 />
               </label>
+              <label className="block text-sm font-medium">
+                Recommended Focus
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] px-3 outline-none focus:border-[#264653]"
+                  defaultValue={job.recommendedFocusTemplateId ?? ""}
+                  key={job.recommendedFocusTemplateId ?? "none"}
+                  name="recommendedFocusTemplateId"
+                >
+                  <option value="">No focus selected</option>
+                  {focusTemplates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               {error ? <p className="text-sm text-[#b42318]">{error}</p> : null}
               {message ? <p className="text-sm text-[#2a6f58]">{message}</p> : null}
               <button
@@ -243,6 +297,25 @@ export default function JobDetailPage() {
                   {job.recommendedFocusTemplate?.name ?? "Not analyzed"}
                 </dd>
               </div>
+              {focusRecommendation ? (
+                <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3">
+                  <dt className="font-medium text-[#17212b]">
+                    Confidence: {focusRecommendation.confidence}%
+                  </dt>
+                  <dd className="mt-2 text-[#65707a]">{focusRecommendation.reason}</dd>
+                  {focusRecommendation.matchedKeywords.length > 0 ? (
+                    <p className="mt-2 text-[#65707a]">
+                      Matched: {focusRecommendation.matchedKeywords.join(", ")}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+              {extractedKeywords?.all.length ? (
+                <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3">
+                  <dt className="font-medium text-[#17212b]">Extracted keywords</dt>
+                  <dd className="mt-2 text-[#65707a]">{extractedKeywords.all.join(", ")}</dd>
+                </div>
+              ) : null}
               <div className="flex justify-between gap-4">
                 <dt className="text-[#65707a]">Date added</dt>
                 <dd className="font-medium text-[#17212b]">{formatDate(job.createdAt)}</dd>
@@ -250,6 +323,14 @@ export default function JobDetailPage() {
             </dl>
             <button
               className="mt-4 h-10 w-full rounded-md border border-[#cfcabf] px-4 text-sm font-medium hover:bg-[#f7f7f4] disabled:opacity-60"
+              disabled={isAnalyzing}
+              onClick={handleAnalyzeJob}
+              type="button"
+            >
+              {isAnalyzing ? "Analyzing..." : "Analyze JD"}
+            </button>
+            <button
+              className="mt-3 h-10 w-full rounded-md border border-[#cfcabf] px-4 text-sm font-medium hover:bg-[#f7f7f4] disabled:opacity-60"
               disabled={isAnalyzing}
               onClick={handleAnalyzeEligibility}
               type="button"

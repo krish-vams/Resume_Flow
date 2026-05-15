@@ -2,6 +2,7 @@ import type { JobStatus, Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { HttpError } from "../utils/http-error";
 import { analyzeEligibility, type EligibilityResult } from "./eligibility.service";
+import { extractKeywords, recommendFocusTemplate, type FocusRecommendation } from "./jd-analysis.service";
 
 type JobInput = {
   companyName?: string;
@@ -12,6 +13,7 @@ type JobInput = {
   jobDescription?: string;
   notes?: string;
   seniorityLevel?: string;
+  recommendedFocusTemplateId?: string | null;
   status?: JobStatus;
 };
 
@@ -27,7 +29,9 @@ const jobSelect = {
   seniorityLevel: true,
   requiredSkillsJson: true,
   preferredSkillsJson: true,
+  jdKeywordsJson: true,
   eligibilityFlagsJson: true,
+  focusRecommendationJson: true,
   recommendedFocusTemplateId: true,
   recommendedFocusTemplate: {
     select: {
@@ -57,6 +61,18 @@ function serializeEligibilityFlags(result: EligibilityResult): Prisma.InputJsonV
   };
 }
 
+function serializeFocusRecommendation(result: FocusRecommendation): Prisma.InputJsonValue {
+  return {
+    recommendedFocus: result.recommendedFocus,
+    recommendedFocusType: result.recommendedFocusType,
+    recommendedFocusTemplateId: result.recommendedFocusTemplateId,
+    confidence: result.confidence,
+    matchedKeywords: result.matchedKeywords,
+    reason: result.reason,
+    analyzedAt: new Date().toISOString()
+  };
+}
+
 export async function createJob(userId: string, input: Required<Pick<JobInput, "companyName" | "jobTitle" | "jobDescription">> & JobInput) {
   const eligibilityResult = analyzeEligibility(input.jobDescription);
 
@@ -72,6 +88,7 @@ export async function createJob(userId: string, input: Required<Pick<JobInput, "
       notes: input.notes,
       seniorityLevel: input.seniorityLevel,
       eligibilityFlagsJson: serializeEligibilityFlags(eligibilityResult),
+      recommendedFocusTemplateId: input.recommendedFocusTemplateId,
       status: input.status
     },
     select: jobSelect
@@ -108,12 +125,17 @@ export async function updateJob(userId: string, jobId: string, input: JobInput) 
     input.jobDescription === undefined
       ? undefined
       : serializeEligibilityFlags(analyzeEligibility(input.jobDescription));
+  const jdKeywordsJson =
+    input.jobDescription === undefined
+      ? undefined
+      : (extractKeywords(input.jobDescription) as unknown as Prisma.InputJsonValue);
 
   return prisma.job.update({
     where: { id: jobId },
     data: {
       ...input,
-      eligibilityFlagsJson
+      eligibilityFlagsJson,
+      jdKeywordsJson
     },
     select: jobSelect
   });
@@ -133,6 +155,41 @@ export async function analyzeJobEligibility(userId: string, jobId: string) {
 
   return {
     analysis: eligibilityResult,
+    job: updatedJob
+  };
+}
+
+export async function analyzeJob(userId: string, jobId: string) {
+  const [job, focusTemplates] = await Promise.all([
+    getJob(userId, jobId),
+    prisma.resumeFocusTemplate.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        focusType: true
+      }
+    })
+  ]);
+  const eligibilityResult = analyzeEligibility(job.jobDescription);
+  const extractedKeywords = extractKeywords(job.jobDescription);
+  const focusRecommendation = recommendFocusTemplate(job.jobDescription, focusTemplates);
+
+  const updatedJob = await prisma.job.update({
+    where: { id: jobId },
+    data: {
+      eligibilityFlagsJson: serializeEligibilityFlags(eligibilityResult),
+      jdKeywordsJson: extractedKeywords as unknown as Prisma.InputJsonValue,
+      focusRecommendationJson: serializeFocusRecommendation(focusRecommendation),
+      recommendedFocusTemplateId: focusRecommendation.recommendedFocusTemplateId
+    },
+    select: jobSelect
+  });
+
+  return {
+    eligibility: eligibilityResult,
+    extractedKeywords,
+    focusRecommendation,
     job: updatedJob
   };
 }

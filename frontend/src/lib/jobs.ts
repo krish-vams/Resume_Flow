@@ -19,6 +19,21 @@ export type EligibilityFlags = {
   analyzedAt?: string;
 };
 
+export type ExtractedKeywords = {
+  all: string[];
+  byFocusType: Record<string, string[]>;
+};
+
+export type FocusRecommendation = {
+  recommendedFocus: string;
+  recommendedFocusType: string;
+  recommendedFocusTemplateId: string | null;
+  confidence: number;
+  matchedKeywords: string[];
+  reason: string;
+  analyzedAt?: string;
+};
+
 export type JobRecord = {
   id: string;
   companyName: string;
@@ -30,7 +45,9 @@ export type JobRecord = {
   seniorityLevel?: string | null;
   requiredSkillsJson?: unknown;
   preferredSkillsJson?: unknown;
+  jdKeywordsJson?: ExtractedKeywords | null;
   eligibilityFlagsJson?: EligibilityFlags | null;
+  focusRecommendationJson?: FocusRecommendation | null;
   recommendedFocusTemplateId?: string | null;
   recommendedFocusTemplate?: {
     id: string;

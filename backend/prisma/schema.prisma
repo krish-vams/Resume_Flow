@@ -99,7 +99,9 @@ model Job {
   seniorityLevel             String?
   requiredSkillsJson         Json?
   preferredSkillsJson        Json?
+  jdKeywordsJson             Json?
   eligibilityFlagsJson       Json?
+  focusRecommendationJson    Json?
   recommendedFocusTemplateId String?
   status                     JobStatus            @default(SAVED)
   notes                      String?

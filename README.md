@@ -161,3 +161,11 @@ npm run prisma:validate
 - Filters for company, role, focus type, application status, validation status, and created date range
 - Resume table with version, validation, match score, DOCX download, and PDF placeholder
 - `/resumes/[id]` detail page with raw resume, formatted file state, related JD, prompt, focus template, validation report, match analysis, and application status
+
+## Phase 11 Scope
+
+- Protected application CRUD API
+- Application tracker page at `/applications`
+- Job and resume-version selection for each application
+- Status, applied date, follow-up date, recruiter details, interview date, and notes tracking
+- Linked job status updates when application status changes

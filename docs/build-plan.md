@@ -112,8 +112,13 @@ Acceptance criteria:
 
 ## Phase 11: Application Tracker
 
-- Add application status workflow.
-- Add applied date, follow-up date, and notes.
+- Add protected application CRUD routes.
+- Link applications to jobs and optional resume versions.
+- Track statuses from Saved through Withdrawn.
+- Store applied date, follow-up date, recruiter name, recruiter email, interview date, and notes.
+- Update the linked job status when application status changes.
+- Add `/applications` with a create/edit form and table view.
+- Allow selecting the resume version used for an application.
 
 ## Phase 12: Resume Match Analysis
 

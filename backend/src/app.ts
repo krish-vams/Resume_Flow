@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import path from "path";
 import { env } from "./config/env";
+import { applicationsRouter } from "./routes/applications.routes";
 import { authRouter } from "./routes/auth.routes";
 import { candidateProfilesRouter } from "./routes/candidate-profiles.routes";
 import { focusTemplatesRouter } from "./routes/focus-templates.routes";
@@ -34,5 +35,6 @@ app.use("/api/focus-templates", focusTemplatesRouter);
 app.use("/api/jobs", jobsRouter);
 app.use("/api/prompts", promptsRouter);
 app.use("/api/resumes", resumesRouter);
+app.use("/api/applications", applicationsRouter);
 
 app.use(errorMiddleware);

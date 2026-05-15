@@ -95,6 +95,15 @@ export default function DashboardPage() {
             Find generated resumes by company, role, focus type, validation status, and application status.
           </p>
         </Link>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/applications"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Application Tracker</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Track applied jobs, resumes used, recruiters, interviews, follow-ups, and outcomes.
+          </p>
+        </Link>
         <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#17212b]">Workflow status</h2>
           <p className="mt-2 text-sm leading-6 text-[#65707a]">

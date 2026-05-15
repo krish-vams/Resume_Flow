@@ -60,3 +60,11 @@ Phase 9 stores validation results in `ResumeValidation`:
 - Bullet count, missing JD skills, language, AI tool, and bold-marker violations are stored in dedicated JSON fields.
 - `overallScore` and `overallStatus` summarize whether the resume passed, has warnings, or failed.
 - `ResumeVersion.validationStatus` mirrors the latest validation status for resume library views.
+
+Phase 11 uses `Application` to track the job application lifecycle:
+
+- `jobId` links every application to a saved job.
+- `resumeVersionId` records which resume was used when available.
+- `status` uses the existing `JobStatus` enum.
+- Applied, follow-up, recruiter, interview, and notes fields support ongoing tracking.
+- Application status changes also update the linked job status.

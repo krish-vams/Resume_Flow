@@ -104,3 +104,11 @@ npm run prisma:validate
 - Protected `POST /api/jobs/:id/analyze-eligibility`
 - Persisted `eligibilityFlagsJson` results on jobs
 - Job detail warnings and blocked resume-generation placeholder
+
+## Phase 4 Scope
+
+- Protected prompt template CRUD
+- Prompt edit version increments when prompt text changes
+- Prompt duplication for role-specific variants
+- MVP final prompt assembly from template plus selected job description
+- Frontend prompt library pages with copy-ready final prompt output

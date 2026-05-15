@@ -29,3 +29,5 @@ Phase 3 stores eligibility gatekeeper results in `Job.eligibilityFlagsJson`:
   "analyzedAt": "2026-05-15T00:00:00.000Z"
 }
 ```
+
+Phase 4 uses `PromptTemplate.version` to record the active version number. Editing prompt text increments the version so future resume records can store which version was used.

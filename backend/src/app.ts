@@ -6,6 +6,7 @@ import { authRouter } from "./routes/auth.routes";
 import { candidateProfilesRouter } from "./routes/candidate-profiles.routes";
 import { healthRouter } from "./routes/health.routes";
 import { jobsRouter } from "./routes/jobs.routes";
+import { promptsRouter } from "./routes/prompts.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 
 export const app = express();
@@ -26,5 +27,6 @@ app.use("/api/health", healthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/candidate-profiles", candidateProfilesRouter);
 app.use("/api/jobs", jobsRouter);
+app.use("/api/prompts", promptsRouter);
 
 app.use(errorMiddleware);

@@ -20,10 +20,15 @@ Initial route groups:
 - `POST /api/jobs/:id/analyze-eligibility`
 - `POST /api/prompts`
 - `GET /api/prompts`
+- `GET /api/prompts/:id`
+- `PUT /api/prompts/:id`
+- `DELETE /api/prompts/:id`
+- `POST /api/prompts/:id/duplicate`
+- `POST /api/prompts/:id/assemble`
 - `POST /api/resumes/upload-raw`
 - `POST /api/resumes/:id/validate`
 - `POST /api/resumes/:id/format`
 - `POST /api/applications`
 - `GET /api/applications`
 
-Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Later phases will add prompts, resumes, and application tracking.
+Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Later phases will add resumes and application tracking.

@@ -39,7 +39,16 @@ Acceptance criteria:
 - Show passed or failed eligibility state on the job detail page.
 - Disable resume generation when eligibility severity is blocked.
 
-## Phase 4: Job and Resume Storage
+## Phase 4: Prompt Library
+
+- Add protected prompt template CRUD.
+- Store prompt name, description, prompt text, target role, candidate name, version, and active state.
+- Increment version when prompt text changes.
+- Add prompt duplication for role-specific variants.
+- Assemble final prompt from selected prompt template and selected job description.
+- Add copy-ready final prompt output in the UI.
+
+## Phase 5: Job and Resume Storage
 
 - Add authentication.
 - Add job description CRUD.
@@ -47,13 +56,6 @@ Acceptance criteria:
 - Call formatter service.
 - Store formatted resume metadata.
 - Link resume versions to jobs.
-
-## Phase 5: Prompt Library
-
-- Store Gemini prompts.
-- Add prompt versioning.
-- Assemble final prompt with JD and profile data.
-- Store prompt used for each resume version.
 
 ## Phase 6: Resume Library and Application Tracker
 

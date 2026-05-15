@@ -68,6 +68,15 @@ export default function DashboardPage() {
             Store contact details, education, certifications, and the default resume output name.
           </p>
         </Link>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/prompts"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Prompt Library</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Save Gemini prompt templates, version edits, duplicate variants, and assemble final prompts.
+          </p>
+        </Link>
         <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#17212b]">Phase 1 status</h2>
           <p className="mt-2 text-sm leading-6 text-[#65707a]">

@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: resumeflow-postgres
+    environment:
+      POSTGRES_USER: resumeflow
+      POSTGRES_PASSWORD: resumeflow
+      POSTGRES_DB: resumeflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resumeflow -d resumeflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: resumeflow-redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: resumeflow-backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://resumeflow:resumeflow@postgres:5432/resumeflow
+      REDIS_URL: redis://redis:6379
+      FORMATTER_SERVICE_URL: http://formatter-service:8000
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  formatter-service:
+    build:
+      context: ./formatter-service
+    container_name: resumeflow-formatter
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres-data:

@@ -59,7 +59,12 @@ export async function duplicatePromptRecord(request: Request, response: Response
 
 export async function assemblePromptRecord(request: Request, response: Response) {
   const input = assemblePromptSchema.parse(request.body);
-  const assembledPrompt = await assemblePrompt(request.user!.id, getPromptId(request), input.jobId);
+  const assembledPrompt = await assemblePrompt(
+    request.user!.id,
+    getPromptId(request),
+    input.jobId,
+    input.referenceEntryIds ?? []
+  );
 
   response.json({ assembledPrompt });
 }

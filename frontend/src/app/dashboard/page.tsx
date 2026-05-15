@@ -104,10 +104,20 @@ export default function DashboardPage() {
             Track applied jobs, resumes used, recruiters, interviews, follow-ups, and outcomes.
           </p>
         </Link>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/reference-library"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Reference Library</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Upload Excel writing guides, parse reference rows, search examples, and use selected context in prompts.
+          </p>
+        </Link>
         <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#17212b]">Workflow status</h2>
           <p className="mt-2 text-sm leading-6 text-[#65707a]">
-            Jobs, prompts, focus templates, resume uploads, formatting, validation, and the resume library are available.
+            Jobs, prompts, focus templates, resume uploads, formatting, validation, resume storage, applications,
+            and reference files are available.
           </p>
         </div>
       </section>

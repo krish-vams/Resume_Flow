@@ -68,3 +68,11 @@ Phase 11 uses `Application` to track the job application lifecycle:
 - `status` uses the existing `JobStatus` enum.
 - Applied, follow-up, recruiter, interview, and notes fields support ongoing tracking.
 - Application status changes also update the linked job status.
+
+Phase 12 uses `ReferenceFile` and `ReferenceEntry` for the resume-writing knowledge base:
+
+- `ReferenceFile.fileUrl` stores a private local storage key for the uploaded XLSX file.
+- `ReferenceFile.category` classifies the source as action verbs, ATS keywords, examples, rewrite guidance, or other.
+- `ReferenceFile.parsedStatus` tracks pending, parsed, and failed parsing states.
+- `ReferenceEntry.content` stores the searchable row text used by prompt assembly.
+- `tagsJson` and `metadataJson` preserve row tags and original column values for later analysis.

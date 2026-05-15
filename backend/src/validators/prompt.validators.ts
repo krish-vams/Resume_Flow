@@ -16,5 +16,6 @@ export const updatePromptSchema = createPromptSchema.partial().refine(
 );
 
 export const assemblePromptSchema = z.object({
-  jobId: z.string().trim().min(1, "Job is required")
+  jobId: z.string().trim().min(1, "Job is required"),
+  referenceEntryIds: z.array(z.string().trim().min(1)).max(50).optional()
 });

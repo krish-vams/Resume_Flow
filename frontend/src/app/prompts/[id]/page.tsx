@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import type { JobRecord } from "@/lib/jobs";
 import type { AssembledPrompt, PromptTemplate } from "@/lib/prompts";
+import { formatReferenceCategory, type ReferenceEntryRecord } from "@/lib/reference-library";
 
 function getRouteId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -17,7 +18,9 @@ export default function PromptDetailPage() {
   const promptId = getRouteId(params.id);
   const [prompt, setPrompt] = useState<PromptTemplate | null>(null);
   const [jobs, setJobs] = useState<JobRecord[]>([]);
+  const [referenceEntries, setReferenceEntries] = useState<ReferenceEntryRecord[]>([]);
   const [selectedJobId, setSelectedJobId] = useState("");
+  const [selectedReferenceEntryIds, setSelectedReferenceEntryIds] = useState<string[]>([]);
   const [assembledPrompt, setAssembledPrompt] = useState<AssembledPrompt | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -32,10 +35,12 @@ export default function PromptDetailPage() {
     Promise.all([
       apiFetch<{ prompt: PromptTemplate }>(`/api/prompts/${promptId}`),
       apiFetch<{ jobs: JobRecord[] }>("/api/jobs"),
+      apiFetch<{ referenceEntries: ReferenceEntryRecord[] }>("/api/reference-entries?limit=25"),
     ])
-      .then(([promptPayload, jobsPayload]) => {
+      .then(([promptPayload, jobsPayload, referenceEntriesPayload]) => {
         setPrompt(promptPayload.prompt);
         setJobs(jobsPayload.jobs);
+        setReferenceEntries(referenceEntriesPayload.referenceEntries);
         setSelectedJobId(jobsPayload.jobs[0]?.id ?? "");
       })
       .catch(() => router.push("/prompts"))
@@ -101,7 +106,7 @@ export default function PromptDetailPage() {
         `/api/prompts/${prompt.id}/assemble`,
         {
           method: "POST",
-          json: { jobId: selectedJobId },
+          json: { jobId: selectedJobId, referenceEntryIds: selectedReferenceEntryIds },
         }
       );
       setAssembledPrompt(response.assembledPrompt);
@@ -127,6 +132,14 @@ export default function PromptDetailPage() {
 
     await apiFetch(`/api/prompts/${prompt.id}`, { method: "DELETE" });
     router.push("/prompts");
+  }
+
+  function toggleReferenceEntry(entryId: string) {
+    setSelectedReferenceEntryIds((currentIds) =>
+      currentIds.includes(entryId)
+        ? currentIds.filter((currentId) => currentId !== entryId)
+        : [...currentIds, entryId]
+    );
   }
 
   if (isLoading) {
@@ -232,6 +245,48 @@ export default function PromptDetailPage() {
             >
               Assemble prompt
             </button>
+          </section>
+
+          <section className="rounded-md border border-[#d9d6cc] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-[#17212b]">Reference context</h2>
+              <Link className="text-sm font-medium text-[#264653]" href="/reference-library">
+                Manage
+              </Link>
+            </div>
+            <p className="mt-2 text-sm text-[#65707a]">
+              {selectedReferenceEntryIds.length} selected for the next assembled prompt.
+            </p>
+            {referenceEntries.length === 0 ? (
+              <p className="mt-3 text-sm text-[#65707a]">Parse a reference file to add optional prompt context.</p>
+            ) : (
+              <div className="mt-4 max-h-[360px] space-y-3 overflow-auto pr-1">
+                {referenceEntries.map((entry) => (
+                  <label
+                    className="block rounded-md border border-[#e4e0d7] p-3 text-sm hover:border-[#264653]"
+                    key={entry.id}
+                  >
+                    <span className="flex items-start gap-3">
+                      <input
+                        checked={selectedReferenceEntryIds.includes(entry.id)}
+                        className="mt-1 h-4 w-4"
+                        onChange={() => toggleReferenceEntry(entry.id)}
+                        type="checkbox"
+                      />
+                      <span>
+                        <span className="block font-medium text-[#17212b]">
+                          {entry.title ?? formatReferenceCategory(entry.category)}
+                        </span>
+                        <span className="mt-1 block text-xs text-[#65707a]">
+                          {formatReferenceCategory(entry.category)} - {entry.referenceFile.name}
+                        </span>
+                        <span className="mt-2 line-clamp-3 block leading-5 text-[#3d4751]">{entry.content}</span>
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="rounded-md border border-[#d9d6cc] bg-white p-5">

@@ -47,5 +47,11 @@ Initial route groups:
 - `GET /api/applications/:id`
 - `PUT /api/applications/:id`
 - `DELETE /api/applications/:id`
+- `POST /api/reference-files/upload`
+- `GET /api/reference-files`
+- `POST /api/reference-files/:id/parse`
+- `GET /api/reference-entries`
+- `GET /api/reference-entries/search`
 
 Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Phase 6 implements JD keyword extraction and auto focus detection. Phase 7 implements raw DOCX resume upload, resume version storage, and authenticated raw resume download. Phase 8 implements formatter service integration, formatted DOCX storage, and authenticated final resume download. Phase 9 implements resume validation and stored check results. Phase 10 adds frontend resume library and detail pages backed by the existing resume list/detail APIs. Phase 11 implements application tracker CRUD and the `/applications` frontend page.
+Phase 12 implements reference file upload, Excel row parsing, reference entry search, and optional reference context in prompt assembly.

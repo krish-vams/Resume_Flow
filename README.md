@@ -169,3 +169,11 @@ npm run prisma:validate
 - Job and resume-version selection for each application
 - Status, applied date, follow-up date, recruiter details, interview date, and notes tracking
 - Linked job status updates when application status changes
+
+## Phase 12 Scope
+
+- Protected Excel reference file upload at `/reference-library`
+- Reference categories for action verbs, ATS keywords, examples, impact notes, and rewriting guides
+- XLSX row parsing into searchable reference entries
+- Reference entry list and search APIs
+- Optional selected reference context during prompt assembly

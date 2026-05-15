@@ -16,5 +16,6 @@ export type AssembledPrompt = {
   promptTemplateId: string;
   promptTemplateVersion: number;
   jobId: string;
+  referenceEntryIds?: string[];
   finalPrompt: string;
 };

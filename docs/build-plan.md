@@ -120,11 +120,21 @@ Acceptance criteria:
 - Add `/applications` with a create/edit form and table view.
 - Allow selecting the resume version used for an application.
 
-## Phase 12: Resume Match Analysis
+## Phase 12: Reference Library
+
+- Add protected Excel reference file upload.
+- Categorize files as action verbs, ATS keywords, accomplishment examples, impact examples, rewriting guides, or other.
+- Store reference files privately in local storage.
+- Parse XLSX rows into searchable reference entries.
+- Add reference entry list and search APIs.
+- Add `/reference-library` for upload, parsing, browsing, and search.
+- Allow selected reference entries to be included in prompt assembly.
+
+## Phase 13: Resume Match Analysis
 
 - Add basic JD keyword matching.
 
-## Phase 13: Direct Gemini Integration
+## Phase 14: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

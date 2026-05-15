@@ -1,6 +1,7 @@
 import { prisma } from "../utils/prisma";
 import { HttpError } from "../utils/http-error";
 import { getJob } from "./job.service";
+import { getReferenceEntriesByIds } from "./reference-library.service";
 
 type PromptInput = {
   name?: string;
@@ -106,14 +107,22 @@ export async function deletePrompt(userId: string, promptId: string) {
   });
 }
 
-export async function assemblePrompt(userId: string, promptId: string, jobId: string) {
-  const [prompt, job] = await Promise.all([
+export async function assemblePrompt(userId: string, promptId: string, jobId: string, referenceEntryIds: string[] = []) {
+  const [prompt, job, referenceEntries] = await Promise.all([
     getPrompt(userId, promptId),
-    getJob(userId, jobId)
+    getJob(userId, jobId),
+    getReferenceEntriesByIds(userId, referenceEntryIds)
   ]);
+  const referenceContext = referenceEntries.map((entry) =>
+    [entry.title ? `${entry.title}: ${entry.content}` : entry.content, `Category: ${entry.category}`]
+      .filter(Boolean)
+      .join("\n")
+  );
 
   const finalPrompt = [
     prompt.promptText.trim(),
+    referenceContext.length ? "\nReference Library Context:" : undefined,
+    ...referenceContext,
     "",
     "Target Job Description:",
     `Company: ${job.companyName}`,
@@ -130,6 +139,7 @@ export async function assemblePrompt(userId: string, promptId: string, jobId: st
     promptTemplateId: prompt.id,
     promptTemplateVersion: prompt.version,
     jobId: job.id,
+    referenceEntryIds: referenceEntries.map((entry) => entry.id),
     finalPrompt
   };
 }

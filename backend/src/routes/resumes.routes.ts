@@ -1,6 +1,8 @@
 import { Router } from "express";
 import {
+  downloadFormattedResumeRecord,
   downloadRawResumeRecord,
+  formatResumeRecord,
   getResumeRecord,
   listResumeRecords,
   removeResumeRecord,
@@ -16,5 +18,7 @@ resumesRouter.use(requireAuth);
 resumesRouter.post("/upload-raw", uploadRawResumeFile.single("rawResumeFile"), asyncHandler(uploadRawResumeRecord));
 resumesRouter.get("/", asyncHandler(listResumeRecords));
 resumesRouter.get("/:id/download-raw", asyncHandler(downloadRawResumeRecord));
+resumesRouter.get("/:id/download-formatted", asyncHandler(downloadFormattedResumeRecord));
+resumesRouter.post("/:id/format", asyncHandler(formatResumeRecord));
 resumesRouter.get("/:id", asyncHandler(getResumeRecord));
 resumesRouter.delete("/:id", asyncHandler(removeResumeRecord));

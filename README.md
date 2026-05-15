@@ -137,3 +137,12 @@ npm run prisma:validate
 - Private local raw resume storage with authenticated download
 - Job detail UI for uploading, viewing, downloading, and deleting raw resume versions
 - Automatic job status update to `RESUME_GENERATED` after upload
+
+## Phase 8 Scope
+
+- Python DOCX formatter modules for parsing, rendering, schemas, and service orchestration
+- FastAPI `POST /format-resume` endpoint for raw DOCX formatting
+- Structured formatter errors for missing sections, invalid DOCX files, template issues, and write failures
+- Backend `POST /api/resumes/:id/format` integration with the formatter service
+- Private formatted DOCX storage with authenticated final resume download
+- Job detail UI actions for formatting a raw resume and downloading the final DOCX

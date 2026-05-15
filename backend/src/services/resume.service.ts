@@ -15,6 +15,13 @@ type UploadRawResumeInput = {
   rawResumeFilePath: string;
 };
 
+type FormatterResponse = {
+  status: "success" | "error";
+  fileName?: string;
+  formattedDocxPath?: string;
+  errors?: string[];
+};
+
 const resumeSelect = {
   id: true,
   userId: true,
@@ -84,6 +91,35 @@ function resolveStorageKey(storageKey: string) {
   }
 
   return absolutePath;
+}
+
+async function getCandidateProfileForFormatting(userId: string, candidateProfileId?: string | null) {
+  const profile = candidateProfileId
+    ? await prisma.candidateProfile.findFirst({
+        where: {
+          id: candidateProfileId,
+          userId
+        }
+      })
+    : await prisma.candidateProfile.findFirst({
+        where: { userId },
+        orderBy: { createdAt: "asc" }
+      });
+
+  if (!profile) {
+    throw new HttpError(400, "Candidate profile is required before formatting");
+  }
+
+  return profile;
+}
+
+async function updateFormattingFailure(resumeId: string, message: string) {
+  await prisma.resumeVersion.update({
+    where: { id: resumeId },
+    data: {
+      status: `Formatting Failed: ${message}`.slice(0, 180)
+    }
+  });
 }
 
 async function assertUserOwnedReferences(userId: string, input: UploadRawResumeInput) {
@@ -224,6 +260,107 @@ export async function getRawResumeDownload(userId: string, resumeId: string) {
   };
 }
 
+export async function formatResumeVersion(userId: string, resumeId: string) {
+  const resume = await getResume(userId, resumeId);
+
+  if (!resume.rawResumeFileUrl) {
+    throw new HttpError(400, "Raw resume file is required before formatting");
+  }
+
+  const rawResumePath = resolveStorageKey(resume.rawResumeFileUrl);
+  const candidateProfile = await getCandidateProfileForFormatting(userId, resume.candidateProfileId);
+  let rawResumeBuffer: Buffer;
+
+  try {
+    rawResumeBuffer = await fs.readFile(rawResumePath);
+  } catch {
+    const message = "Raw resume file not found";
+    await updateFormattingFailure(resume.id, message);
+    throw new HttpError(404, message);
+  }
+
+  const rawResumeBytes = new Uint8Array(rawResumeBuffer.length);
+  rawResumeBytes.set(rawResumeBuffer);
+  const formData = new FormData();
+  formData.set(
+    "raw_resume_file",
+    new Blob([rawResumeBytes], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    }),
+    `${resume.resumeName}-v${resume.version}.docx`
+  );
+  formData.set("candidate_profile_json", JSON.stringify(candidateProfile));
+  formData.set("output_name", `${resume.resumeName}-formatted-v${resume.version}`);
+
+  let formatterPayload: FormatterResponse;
+
+  try {
+    const formatterResponse = await fetch(`${env.FORMATTER_SERVICE_URL}/format-resume`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!formatterResponse.ok) {
+      throw new Error(formatterResponse.statusText || "Formatter service failed");
+    }
+
+    formatterPayload = (await formatterResponse.json()) as FormatterResponse;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Formatter service unavailable";
+    await updateFormattingFailure(resume.id, message);
+    throw new HttpError(502, message);
+  }
+
+  if (formatterPayload.status !== "success" || !formatterPayload.fileName) {
+    const message = formatterPayload.errors?.join(", ") || "Formatter service returned an error";
+    await updateFormattingFailure(resume.id, message);
+    throw new HttpError(422, message, formatterPayload.errors);
+  }
+
+  try {
+    const formattedResponse = await fetch(
+      `${env.FORMATTER_SERVICE_URL}/outputs/${encodeURIComponent(formatterPayload.fileName)}`
+    );
+
+    if (!formattedResponse.ok) {
+      throw new Error("Unable to download formatted DOCX from formatter service");
+    }
+
+    const formattedBuffer = Buffer.from(await formattedResponse.arrayBuffer());
+    const formattedUploadPath = path.resolve(env.LOCAL_STORAGE_PATH, "formatted-resumes", userId);
+    await fs.mkdir(formattedUploadPath, { recursive: true });
+    const formattedFileName = `${Date.now()}-${formatterPayload.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const formattedPath = path.join(formattedUploadPath, formattedFileName);
+    await fs.writeFile(formattedPath, formattedBuffer);
+
+    return prisma.resumeVersion.update({
+      where: { id: resume.id },
+      data: {
+        formattedDocxUrl: toStorageKey(formattedPath),
+        status: "Formatted"
+      },
+      select: resumeSelect
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to store formatted DOCX";
+    await updateFormattingFailure(resume.id, message);
+    throw new HttpError(502, message);
+  }
+}
+
+export async function getFormattedResumeDownload(userId: string, resumeId: string) {
+  const resume = await getResume(userId, resumeId);
+
+  if (!resume.formattedDocxUrl) {
+    throw new HttpError(404, "Formatted resume file not found");
+  }
+
+  return {
+    absolutePath: resolveStorageKey(resume.formattedDocxUrl),
+    filename: `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}-formatted-v${resume.version}.docx`
+  };
+}
+
 export async function deleteResume(userId: string, resumeId: string) {
   const resume = await getResume(userId, resumeId);
 
@@ -233,6 +370,14 @@ export async function deleteResume(userId: string, resumeId: string) {
 
   if (resume.rawResumeFileUrl) {
     await fs.unlink(resolveStorageKey(resume.rawResumeFileUrl)).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    });
+  }
+
+  if (resume.formattedDocxUrl) {
+    await fs.unlink(resolveStorageKey(resume.formattedDocxUrl)).catch((error: NodeJS.ErrnoException) => {
       if (error.code !== "ENOENT") {
         throw error;
       }

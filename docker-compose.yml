@@ -49,6 +49,9 @@ services:
     build:
       context: ./formatter-service
     container_name: resumeflow-formatter
+    environment:
+      FORMATTER_OUTPUT_DIR: /app/outputs
+      BASE_RESUME_TEMPLATE_PATH: ${BASE_RESUME_TEMPLATE_PATH:-}
     ports:
       - "8000:8000"
 

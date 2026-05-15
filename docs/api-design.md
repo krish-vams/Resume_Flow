@@ -38,7 +38,10 @@ Initial route groups:
 - `DELETE /api/resumes/:id`
 - `POST /api/resumes/:id/validate`
 - `POST /api/resumes/:id/format`
+- `GET /api/resumes/:id/download-formatted`
+- `POST /format-resume`
+- `GET /outputs/:fileName`
 - `POST /api/applications`
 - `GET /api/applications`
 
-Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Phase 6 implements JD keyword extraction and auto focus detection. Phase 7 implements raw DOCX resume upload, resume version storage, and authenticated raw resume download. Later phases will add formatter output, validation, and application tracking.
+Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Phase 6 implements JD keyword extraction and auto focus detection. Phase 7 implements raw DOCX resume upload, resume version storage, and authenticated raw resume download. Phase 8 implements formatter service integration, formatted DOCX storage, and authenticated final resume download. Later phases will add validation and application tracking.

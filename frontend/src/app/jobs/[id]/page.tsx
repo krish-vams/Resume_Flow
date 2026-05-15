@@ -41,6 +41,7 @@ export default function JobDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [formattingResumeId, setFormattingResumeId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) {
@@ -196,30 +197,53 @@ export default function JobDetailPage() {
     }
   }
 
-  async function handleDownloadResume(resume: ResumeVersionRecord) {
+  async function downloadResumeFile(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
     setError("");
     setMessage("");
 
     try {
-      const response = await fetch(`${API_URL}/api/resumes/${resume.id}/download-raw`, {
+      const response = await fetch(`${API_URL}/api/resumes/${resume.id}/download-${kind}`, {
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error(response.statusText || "Unable to download raw resume");
+        throw new Error(response.statusText || `Unable to download ${kind} resume`);
       }
 
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
-      link.download = `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}-v${resume.version}.docx`;
+      link.download = `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}${kind === "formatted" ? "-formatted" : ""}-v${resume.version}.docx`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(objectUrl);
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to download raw resume");
+      setError(caughtError instanceof Error ? caughtError.message : `Unable to download ${kind} resume`);
+    }
+  }
+
+  async function handleFormatResume(resume: ResumeVersionRecord) {
+    setError("");
+    setMessage("");
+    setFormattingResumeId(resume.id);
+
+    try {
+      const response = await apiFetch<{ resume: ResumeVersionRecord; downloadUrl: string }>(
+        `/api/resumes/${resume.id}/format`,
+        { method: "POST" }
+      );
+      setResumes((currentResumes) =>
+        currentResumes.map((currentResume) =>
+          currentResume.id === response.resume.id ? response.resume : currentResume
+        )
+      );
+      setMessage(`Formatted resume v${response.resume.version} is ready`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to format resume");
+    } finally {
+      setFormattingResumeId(null);
     }
   }
 
@@ -409,19 +433,40 @@ export default function JobDetailPage() {
                       <p className="mt-1 text-sm text-[#65707a]">
                         {formatResumeStatus(resume.status)} - {formatDate(resume.createdAt)}
                       </p>
+                      {resume.formattedDocxUrl ? (
+                        <p className="mt-1 text-sm font-medium text-[#2a6f58]">
+                          Formatted DOCX ready
+                        </p>
+                      ) : null}
                       <p className="mt-1 text-sm text-[#65707a]">
                         {[resume.candidateProfile?.fullName, resume.promptTemplate?.name, resume.focusTemplate?.name]
                           .filter(Boolean)
                           .join(" - ") || "No linked profile, prompt, or focus template"}
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white"
-                        onClick={() => handleDownloadResume(resume)}
+                        onClick={() => downloadResumeFile(resume, "raw")}
                         type="button"
                       >
-                        Download
+                        Raw
+                      </button>
+                      <button
+                        className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white disabled:opacity-60"
+                        disabled={formattingResumeId === resume.id}
+                        onClick={() => handleFormatResume(resume)}
+                        type="button"
+                      >
+                        {formattingResumeId === resume.id ? "Formatting..." : "Format"}
+                      </button>
+                      <button
+                        className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white disabled:opacity-60"
+                        disabled={!resume.formattedDocxUrl}
+                        onClick={() => downloadResumeFile(resume, "formatted")}
+                        type="button"
+                      >
+                        Final
                       </button>
                       <button
                         className="h-9 rounded-md border border-[#b42318] px-3 text-sm font-medium text-[#b42318] hover:bg-[#fff5f5]"

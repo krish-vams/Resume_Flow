@@ -2,6 +2,8 @@ import fs from "fs/promises";
 import type { Request, Response } from "express";
 import {
   deleteResume,
+  formatResumeVersion,
+  getFormattedResumeDownload,
   getRawResumeDownload,
   getResume,
   listResumes,
@@ -61,6 +63,22 @@ export async function getResumeRecord(request: Request, response: Response) {
 
 export async function downloadRawResumeRecord(request: Request, response: Response) {
   const download = await getRawResumeDownload(request.user!.id, getResumeId(request));
+
+  response.download(download.absolutePath, download.filename);
+}
+
+export async function formatResumeRecord(request: Request, response: Response) {
+  const resumeId = getResumeId(request);
+  const resume = await formatResumeVersion(request.user!.id, resumeId);
+
+  response.json({
+    resume,
+    downloadUrl: `/api/resumes/${resumeId}/download-formatted`
+  });
+}
+
+export async function downloadFormattedResumeRecord(request: Request, response: Response) {
+  const download = await getFormattedResumeDownload(request.user!.id, getResumeId(request));
 
   response.download(download.absolutePath, download.filename);
 }

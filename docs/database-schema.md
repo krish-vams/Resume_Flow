@@ -47,3 +47,9 @@ Phase 7 uses `ResumeVersion` for raw Gemini output storage:
 - `rawResumeText` can store pasted raw resume content alongside the uploaded DOCX.
 - `version` increments per job through `@@unique([jobId, version])`.
 - `status` starts as `Raw Uploaded`; formatter and validation phases will update it later.
+
+Phase 8 updates existing `ResumeVersion` rows after formatter execution:
+
+- `formattedDocxUrl` stores a private backend storage key for the formatted DOCX.
+- `status` becomes `Formatted` when formatting succeeds.
+- `status` becomes `Formatting Failed: <reason>` when the formatter returns a clean parse/render error.

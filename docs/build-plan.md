@@ -77,8 +77,13 @@ Acceptance criteria:
 
 ## Phase 8: Formatter Integration and Final Resume Storage
 
-- Call formatter service.
-- Store formatted DOCX metadata.
+- Refactor the Python formatter into parser, renderer, schemas, and service modules.
+- Add `POST /format-resume` to accept raw DOCX, candidate profile JSON, and output name.
+- Return clean formatter errors for missing sections, invalid DOCX files, missing base templates, and write failures.
+- Add backend `POST /api/resumes/:id/format` to call the formatter service.
+- Store formatted DOCX files in backend-managed local storage.
+- Add authenticated formatted DOCX download.
+- Show format and final download actions on the job detail resume version list.
 - Add later PDF export path.
 - Track validation and formatter status on resume versions.
 

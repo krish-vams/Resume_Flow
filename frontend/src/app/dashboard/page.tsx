@@ -77,6 +77,15 @@ export default function DashboardPage() {
             Save Gemini prompt templates, version edits, duplicate variants, and assemble final prompts.
           </p>
         </Link>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/focus-templates"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Focus Templates</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Manage stack-specific resume strategies for Java, .NET, Node.js, Go, AI, cloud, and full-stack roles.
+          </p>
+        </Link>
         <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#17212b]">Phase 1 status</h2>
           <p className="mt-2 text-sm leading-6 text-[#65707a]">

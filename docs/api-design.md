@@ -25,10 +25,15 @@ Initial route groups:
 - `DELETE /api/prompts/:id`
 - `POST /api/prompts/:id/duplicate`
 - `POST /api/prompts/:id/assemble`
+- `POST /api/focus-templates`
+- `GET /api/focus-templates`
+- `GET /api/focus-templates/:id`
+- `PUT /api/focus-templates/:id`
+- `DELETE /api/focus-templates/:id`
 - `POST /api/resumes/upload-raw`
 - `POST /api/resumes/:id/validate`
 - `POST /api/resumes/:id/format`
 - `POST /api/applications`
 - `GET /api/applications`
 
-Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Later phases will add resumes and application tracking.
+Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements protected job description CRUD. Phase 3 implements eligibility analysis. Phase 4 implements the prompt library. Phase 5 implements focus templates. Later phases will add resumes and application tracking.

@@ -48,7 +48,15 @@ Acceptance criteria:
 - Assemble final prompt from selected prompt template and selected job description.
 - Add copy-ready final prompt output in the UI.
 
-## Phase 5: Job and Resume Storage
+## Phase 5: Resume Focus Templates
+
+- Add protected resume focus template CRUD.
+- Store focus type, primary language, target roles, description, base resume text, uploaded resume file URL, and default skills.
+- Support local focused resume file upload for MVP.
+- Add focus template list, create, and detail/edit pages.
+- Keep focus template IDs ready for future resume generation and resume version records.
+
+## Phase 6: Job and Resume Storage
 
 - Add authentication.
 - Add job description CRUD.
@@ -57,13 +65,13 @@ Acceptance criteria:
 - Store formatted resume metadata.
 - Link resume versions to jobs.
 
-## Phase 6: Resume Library and Application Tracker
+## Phase 7: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 7: Resume Validator
+## Phase 8: Resume Validator
 
 - Add eligibility checks.
 - Validate summary word count.
@@ -71,13 +79,13 @@ Acceptance criteria:
 - Validate skills sections.
 - Add basic JD keyword matching.
 
-## Phase 8: Focus Templates and Auto Detection
+## Phase 9: Auto Detection
 
 - Add focus template storage.
 - Recommend focus from JD keywords.
 - Store focus used for each generated resume.
 
-## Phase 9: Direct Gemini Integration
+## Phase 10: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

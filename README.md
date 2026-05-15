@@ -112,3 +112,11 @@ npm run prisma:validate
 - Prompt duplication for role-specific variants
 - MVP final prompt assembly from template plus selected job description
 - Frontend prompt library pages with copy-ready final prompt output
+
+## Phase 5 Scope
+
+- Protected resume focus template CRUD
+- Focus types for Java Backend, .NET, Node.js, Golang, AI, Cloud/DevOps, Full Stack, and Custom
+- Local focused resume file upload for MVP
+- Target roles, base resume text, and default skills storage
+- Frontend focus template list, create, and detail/edit pages

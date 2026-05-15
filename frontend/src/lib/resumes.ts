@@ -30,6 +30,16 @@ export type ResumeValidationRecord = {
   createdAt: string;
 };
 
+export type ResumeJobSummary = {
+  id: string;
+  companyName: string;
+  jobTitle: string;
+  jobDescription?: string | null;
+  status?: string | null;
+  jobUrl?: string | null;
+  location?: string | null;
+};
+
 export type ResumeVersionRecord = {
   id: string;
   userId: string;
@@ -46,11 +56,7 @@ export type ResumeVersionRecord = {
   matchScore?: number | null;
   validationStatus: string;
   status: string;
-  job: {
-    id: string;
-    companyName: string;
-    jobTitle: string;
-  };
+  job: ResumeJobSummary;
   candidateProfile?: {
     id: string;
     fullName: string;
@@ -59,14 +65,19 @@ export type ResumeVersionRecord = {
   promptTemplate?: {
     id: string;
     name: string;
+    description?: string | null;
+    promptText?: string | null;
+    targetRole?: string | null;
     version: number;
   } | null;
   focusTemplate?: {
     id: string;
     name: string;
     focusType: string;
+    description?: string | null;
+    primaryLanguage?: string | null;
   } | null;
-  validation?: Pick<ResumeValidationRecord, "id" | "overallStatus" | "overallScore" | "checksJson" | "createdAt"> | null;
+  validation?: ResumeValidationRecord | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -81,4 +92,11 @@ export function formatResumeStatus(status: string) {
 
 export function formatValidationStatus(status: string) {
   return formatResumeStatus(status);
+}
+
+export function downloadResumeFile(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
+  return {
+    path: `/api/resumes/${resume.id}/download-${kind}`,
+    fileName: `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}${kind === "formatted" ? "-formatted" : ""}-v${resume.version}.docx`,
+  };
 }

@@ -86,10 +86,19 @@ export default function DashboardPage() {
             Manage stack-specific resume strategies for Java, .NET, Node.js, Go, AI, cloud, and full-stack roles.
           </p>
         </Link>
-        <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
-          <h2 className="text-lg font-semibold text-[#17212b]">Phase 1 status</h2>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/resumes"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Resume Library</h2>
           <p className="mt-2 text-sm leading-6 text-[#65707a]">
-            Authentication and candidate profile APIs are ready for the formatter integration path.
+            Find generated resumes by company, role, focus type, validation status, and application status.
+          </p>
+        </Link>
+        <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[#17212b]">Workflow status</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Jobs, prompts, focus templates, resume uploads, formatting, validation, and the resume library are available.
           </p>
         </div>
       </section>

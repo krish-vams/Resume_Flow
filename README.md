@@ -154,3 +154,10 @@ npm run prisma:validate
 - Summary, bullet count, bullet length, programming language, AI term, skills, bold marker, and header checks
 - Stored validation score, status, checklist, and violation metadata
 - Job detail UI action for validating a resume version and reviewing check results
+
+## Phase 10 Scope
+
+- Central `/resumes` library for all generated resume versions
+- Filters for company, role, focus type, application status, validation status, and created date range
+- Resume table with version, validation, match score, DOCX download, and PDF placeholder
+- `/resumes/[id]` detail page with raw resume, formatted file state, related JD, prompt, focus template, validation report, match analysis, and application status

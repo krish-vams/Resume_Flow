@@ -101,17 +101,25 @@ Acceptance criteria:
 - Store validation checks, score, and status in `ResumeValidation`.
 - Show validation status and check details on the job detail resume version list.
 
-## Phase 10: Resume Library and Application Tracker
+## Phase 10: Resume Library
 
-- Add resume history.
+- Add `/resumes` as the central resume library.
+- Show resume name, company, role, focus type, version, validation status, match score, created date, DOCX download, and PDF placeholder.
+- Filter by company, role, focus type, application status, validation status, and created date range.
+- Add `/resumes/:id` to inspect one resume version.
+- Show raw resume text or raw DOCX download, formatted DOCX state, related job description, prompt used, focus template, validation report, match analysis, and application status.
+- Link the dashboard to the resume library.
+
+## Phase 11: Application Tracker
+
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 11: Resume Match Analysis
+## Phase 12: Resume Match Analysis
 
 - Add basic JD keyword matching.
 
-## Phase 12: Direct Gemini Integration
+## Phase 13: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

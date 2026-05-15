@@ -42,7 +42,11 @@ const resumeSelect = {
     select: {
       id: true,
       companyName: true,
-      jobTitle: true
+      jobTitle: true,
+      jobDescription: true,
+      status: true,
+      jobUrl: true,
+      location: true
     }
   },
   candidateProfile: {
@@ -56,6 +60,9 @@ const resumeSelect = {
     select: {
       id: true,
       name: true,
+      description: true,
+      promptText: true,
+      targetRole: true,
       version: true
     }
   },
@@ -63,12 +70,25 @@ const resumeSelect = {
     select: {
       id: true,
       name: true,
-      focusType: true
+      focusType: true,
+      description: true,
+      primaryLanguage: true
     }
   },
   validation: {
     select: {
       id: true,
+      resumeVersionId: true,
+      summaryWordCount: true,
+      accentureBulletCount: true,
+      dreamsBulletCount: true,
+      capitalBulletCount: true,
+      invalidBulletsJson: true,
+      missingRequiredSkillsJson: true,
+      missingPreferredSkillsJson: true,
+      languageRuleViolationsJson: true,
+      aiToolViolationsJson: true,
+      boldMarkerViolationsJson: true,
       overallStatus: true,
       overallScore: true,
       checksJson: true,

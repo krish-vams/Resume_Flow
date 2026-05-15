@@ -9,6 +9,10 @@ import {
   listResumes,
   uploadRawResume
 } from "../services/resume.service";
+import {
+  getResumeValidation,
+  validateResumeVersion
+} from "../services/resume-validation.service";
 import { uploadRawResumeSchema } from "../validators/resume.validators";
 import { HttpError } from "../utils/http-error";
 
@@ -81,6 +85,20 @@ export async function downloadFormattedResumeRecord(request: Request, response: 
   const download = await getFormattedResumeDownload(request.user!.id, getResumeId(request));
 
   response.download(download.absolutePath, download.filename);
+}
+
+export async function validateResumeRecord(request: Request, response: Response) {
+  const resumeId = getResumeId(request);
+  const validation = await validateResumeVersion(request.user!.id, resumeId);
+  const resume = await getResume(request.user!.id, resumeId);
+
+  response.json({ validation, resume });
+}
+
+export async function getResumeValidationRecord(request: Request, response: Response) {
+  const validation = await getResumeValidation(request.user!.id, getResumeId(request));
+
+  response.json({ validation });
 }
 
 export async function removeResumeRecord(request: Request, response: Response) {

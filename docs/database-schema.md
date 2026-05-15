@@ -53,3 +53,10 @@ Phase 8 updates existing `ResumeVersion` rows after formatter execution:
 - `formattedDocxUrl` stores a private backend storage key for the formatted DOCX.
 - `status` becomes `Formatted` when formatting succeeds.
 - `status` becomes `Formatting Failed: <reason>` when the formatter returns a clean parse/render error.
+
+Phase 9 stores validation results in `ResumeValidation`:
+
+- `checksJson` stores the user-facing checklist with names, statuses, and details.
+- Bullet count, missing JD skills, language, AI tool, and bold-marker violations are stored in dedicated JSON fields.
+- `overallScore` and `overallStatus` summarize whether the resume passed, has warnings, or failed.
+- `ResumeVersion.validationStatus` mirrors the latest validation status for resume library views.

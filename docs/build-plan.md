@@ -87,21 +87,31 @@ Acceptance criteria:
 - Add later PDF export path.
 - Track validation and formatter status on resume versions.
 
-## Phase 9: Resume Library and Application Tracker
+## Phase 9: Resume Validator
+
+- Validate raw resume text or extract text from the uploaded raw DOCX.
+- Check Professional Summary existence, 55-60 word count, and target job title mention.
+- Check Accenture, Dreams Media Solutions, and Capital Info Solutions bullet counts.
+- Check every experience bullet for 20-24 words.
+- Flag bullets that include more than one core programming language.
+- Flag AI tool terms in Dreams Media Solutions and Capital Info Solutions bullets.
+- Validate skills categories, Certifications, JD skill coverage, and title case.
+- Validate bold markers for important JD terms.
+- Validate candidate/contact headers, education presence, and experience headers without locations.
+- Store validation checks, score, and status in `ResumeValidation`.
+- Show validation status and check details on the job detail resume version list.
+
+## Phase 10: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 10: Resume Validator
+## Phase 11: Resume Match Analysis
 
-- Add eligibility checks.
-- Validate summary word count.
-- Validate bullet counts and bullet lengths.
-- Validate skills sections.
 - Add basic JD keyword matching.
 
-## Phase 11: Direct Gemini Integration
+## Phase 12: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

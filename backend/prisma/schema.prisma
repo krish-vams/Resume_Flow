@@ -231,6 +231,7 @@ model ResumeValidation {
   languageRuleViolationsJson Json?
   aiToolViolationsJson       Json?
   boldMarkerViolationsJson   Json?
+  checksJson                 Json?
   overallScore               Int?
   overallStatus              ValidationStatus @default(NOT_RUN)
   resumeVersion              ResumeVersion    @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)

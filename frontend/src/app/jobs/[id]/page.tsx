@@ -17,8 +17,10 @@ import {
 import type { ResumeFocusTemplate } from "@/lib/focus-templates";
 import type { PromptTemplate } from "@/lib/prompts";
 import {
+  formatValidationStatus,
   formatResumeStatus,
   type CandidateProfileSummary,
+  type ResumeValidationRecord,
   type ResumeVersionRecord,
 } from "@/lib/resumes";
 
@@ -42,6 +44,7 @@ export default function JobDetailPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [formattingResumeId, setFormattingResumeId] = useState<string | null>(null);
+  const [validatingResumeId, setValidatingResumeId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) {
@@ -247,6 +250,29 @@ export default function JobDetailPage() {
     }
   }
 
+  async function handleValidateResume(resume: ResumeVersionRecord) {
+    setError("");
+    setMessage("");
+    setValidatingResumeId(resume.id);
+
+    try {
+      const response = await apiFetch<{ validation: ResumeValidationRecord; resume: ResumeVersionRecord }>(
+        `/api/resumes/${resume.id}/validate`,
+        { method: "POST" }
+      );
+      setResumes((currentResumes) =>
+        currentResumes.map((currentResume) =>
+          currentResume.id === response.resume.id ? response.resume : currentResume
+        )
+      );
+      setMessage(`Validation ${formatValidationStatus(response.validation.overallStatus)} - ${response.validation.overallScore ?? 0}`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to validate resume");
+    } finally {
+      setValidatingResumeId(null);
+    }
+  }
+
   async function handleDeleteResume(resume: ResumeVersionRecord) {
     setError("");
     setMessage("");
@@ -438,11 +464,39 @@ export default function JobDetailPage() {
                           Formatted DOCX ready
                         </p>
                       ) : null}
+                      {resume.validation ? (
+                        <p
+                          className={`mt-1 text-sm font-medium ${
+                            resume.validation.overallStatus === "FAILED"
+                              ? "text-[#b42318]"
+                              : resume.validation.overallStatus === "WARNING"
+                                ? "text-[#9a6700]"
+                                : "text-[#2a6f58]"
+                          }`}
+                        >
+                          Validation {formatValidationStatus(resume.validation.overallStatus)} - {resume.validation.overallScore ?? 0}
+                        </p>
+                      ) : null}
                       <p className="mt-1 text-sm text-[#65707a]">
                         {[resume.candidateProfile?.fullName, resume.promptTemplate?.name, resume.focusTemplate?.name]
                           .filter(Boolean)
                           .join(" - ") || "No linked profile, prompt, or focus template"}
                       </p>
+                      {resume.validation?.checksJson?.length ? (
+                        <div className="mt-3 grid gap-2">
+                          {resume.validation.checksJson.map((check) => (
+                            <div
+                              className="rounded-md border border-[#d9d6cc] bg-white px-3 py-2"
+                              key={check.name}
+                            >
+                              <p className="text-sm font-medium text-[#17212b]">
+                                {check.name}: {formatResumeStatus(check.status)}
+                              </p>
+                              <p className="mt-1 text-sm text-[#65707a]">{check.details}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -451,6 +505,14 @@ export default function JobDetailPage() {
                         type="button"
                       >
                         Raw
+                      </button>
+                      <button
+                        className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white disabled:opacity-60"
+                        disabled={validatingResumeId === resume.id}
+                        onClick={() => handleValidateResume(resume)}
+                        type="button"
+                      >
+                        {validatingResumeId === resume.id ? "Validating..." : "Validate"}
                       </button>
                       <button
                         className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white disabled:opacity-60"

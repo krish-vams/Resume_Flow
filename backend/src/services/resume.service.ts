@@ -66,6 +66,15 @@ const resumeSelect = {
       focusType: true
     }
   },
+  validation: {
+    select: {
+      id: true,
+      overallStatus: true,
+      overallScore: true,
+      checksJson: true,
+      createdAt: true
+    }
+  },
   createdAt: true,
   updatedAt: true
 };
@@ -82,7 +91,7 @@ function toStorageKey(filePath: string) {
   return relativePath.split(path.sep).join("/");
 }
 
-function resolveStorageKey(storageKey: string) {
+export function resolveStorageKey(storageKey: string) {
   const storageRoot = path.resolve(env.LOCAL_STORAGE_PATH);
   const absolutePath = path.resolve(storageRoot, storageKey);
 

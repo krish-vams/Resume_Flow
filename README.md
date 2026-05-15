@@ -146,3 +146,11 @@ npm run prisma:validate
 - Backend `POST /api/resumes/:id/format` integration with the formatter service
 - Private formatted DOCX storage with authenticated final resume download
 - Job detail UI actions for formatting a raw resume and downloading the final DOCX
+
+## Phase 9 Scope
+
+- Protected `POST /api/resumes/:id/validate` and `GET /api/resumes/:id/validation`
+- Raw resume validation from pasted text or uploaded DOCX extraction
+- Summary, bullet count, bullet length, programming language, AI term, skills, bold marker, and header checks
+- Stored validation score, status, checklist, and violation metadata
+- Job detail UI action for validating a resume version and reviewing check results

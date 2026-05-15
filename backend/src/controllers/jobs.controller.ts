@@ -1,5 +1,12 @@
 import type { Request, Response } from "express";
-import { createJob, deleteJob, getJob, listJobs, updateJob } from "../services/job.service";
+import {
+  analyzeJobEligibility,
+  createJob,
+  deleteJob,
+  getJob,
+  listJobs,
+  updateJob
+} from "../services/job.service";
 import { createJobSchema, updateJobSchema } from "../validators/job.validators";
 import { HttpError } from "../utils/http-error";
 
@@ -37,6 +44,12 @@ export async function updateJobRecord(request: Request, response: Response) {
   const job = await updateJob(request.user!.id, getJobId(request), input);
 
   response.json({ job });
+}
+
+export async function analyzeJobEligibilityRecord(request: Request, response: Response) {
+  const result = await analyzeJobEligibility(request.user!.id, getJobId(request));
+
+  response.json(result);
 }
 
 export async function removeJobRecord(request: Request, response: Response) {

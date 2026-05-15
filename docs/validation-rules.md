@@ -14,3 +14,25 @@ Initial validator requirements:
 - Flag AI tools in Dreams Media Solutions and Capital Info Solutions.
 - Require 7 skills categories plus Certifications.
 - Require important metrics and technologies to use `**bold**` markers before formatting.
+
+## Eligibility Gatekeeper
+
+Restricted terms:
+
+- U.S. Citizenship
+- US Citizenship
+- U.S. Citizen
+- US Citizen
+- U.S. Persons Only
+- US Persons Only
+- Security Clearance
+- Active Clearance
+- Secret Clearance
+- Top Secret
+- TS/SCI
+- Public Trust
+- Clearance Required
+- Must Be A U.S. Citizen
+- Only U.S. Citizens
+
+If any restricted term is found, eligibility severity is `blocked` and resume generation should be disabled until a future manual override flow exists.

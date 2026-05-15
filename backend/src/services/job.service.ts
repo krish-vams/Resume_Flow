@@ -1,6 +1,7 @@
-import type { JobStatus } from "@prisma/client";
+import type { JobStatus, Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { HttpError } from "../utils/http-error";
+import { analyzeEligibility, type EligibilityResult } from "./eligibility.service";
 
 type JobInput = {
   companyName?: string;
@@ -47,7 +48,18 @@ const jobSelect = {
   updatedAt: true
 };
 
+function serializeEligibilityFlags(result: EligibilityResult): Prisma.InputJsonValue {
+  return {
+    passed: result.passed,
+    restrictedTermsFound: result.restrictedTermsFound,
+    severity: result.severity,
+    analyzedAt: new Date().toISOString()
+  };
+}
+
 export async function createJob(userId: string, input: Required<Pick<JobInput, "companyName" | "jobTitle" | "jobDescription">> & JobInput) {
+  const eligibilityResult = analyzeEligibility(input.jobDescription);
+
   return prisma.job.create({
     data: {
       userId,
@@ -59,6 +71,7 @@ export async function createJob(userId: string, input: Required<Pick<JobInput, "
       jobDescription: input.jobDescription,
       notes: input.notes,
       seniorityLevel: input.seniorityLevel,
+      eligibilityFlagsJson: serializeEligibilityFlags(eligibilityResult),
       status: input.status
     },
     select: jobSelect
@@ -91,12 +104,37 @@ export async function getJob(userId: string, jobId: string) {
 
 export async function updateJob(userId: string, jobId: string, input: JobInput) {
   await getJob(userId, jobId);
+  const eligibilityFlagsJson =
+    input.jobDescription === undefined
+      ? undefined
+      : serializeEligibilityFlags(analyzeEligibility(input.jobDescription));
 
   return prisma.job.update({
     where: { id: jobId },
-    data: input,
+    data: {
+      ...input,
+      eligibilityFlagsJson
+    },
     select: jobSelect
   });
+}
+
+export async function analyzeJobEligibility(userId: string, jobId: string) {
+  const job = await getJob(userId, jobId);
+  const eligibilityResult = analyzeEligibility(job.jobDescription);
+
+  const updatedJob = await prisma.job.update({
+    where: { id: jobId },
+    data: {
+      eligibilityFlagsJson: serializeEligibilityFlags(eligibilityResult)
+    },
+    select: jobSelect
+  });
+
+  return {
+    analysis: eligibilityResult,
+    job: updatedJob
+  };
 }
 
 export async function deleteJob(userId: string, jobId: string) {

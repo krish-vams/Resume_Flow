@@ -12,6 +12,13 @@ export const jobStatusOptions = [
 
 export type JobStatus = (typeof jobStatusOptions)[number]["value"];
 
+export type EligibilityFlags = {
+  passed: boolean;
+  restrictedTermsFound: string[];
+  severity: "none" | "warning" | "blocked";
+  analyzedAt?: string;
+};
+
 export type JobRecord = {
   id: string;
   companyName: string;
@@ -23,7 +30,7 @@ export type JobRecord = {
   seniorityLevel?: string | null;
   requiredSkillsJson?: unknown;
   preferredSkillsJson?: unknown;
-  eligibilityFlagsJson?: unknown;
+  eligibilityFlagsJson?: EligibilityFlags | null;
   recommendedFocusTemplateId?: string | null;
   recommendedFocusTemplate?: {
     id: string;
@@ -50,4 +57,14 @@ export function formatDate(value: string) {
     day: "numeric",
     year: "numeric",
   }).format(new Date(value));
+}
+
+export function getEligibilityFlags(job: JobRecord): EligibilityFlags {
+  return (
+    job.eligibilityFlagsJson ?? {
+      passed: true,
+      restrictedTermsFound: [],
+      severity: "none",
+    }
+  );
 }

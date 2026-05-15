@@ -30,7 +30,16 @@ Acceptance criteria:
 - Add a job detail page with JD, notes, status, generated resume count, eligibility placeholder, and focus placeholder.
 - Keep all jobs scoped to the logged-in user.
 
-## Phase 3: Job and Resume Storage
+## Phase 3: Eligibility Gatekeeper
+
+- Scan job descriptions for restricted terms before resume generation.
+- Store analysis in `Job.eligibilityFlagsJson`.
+- Run eligibility analysis automatically on job creation and JD updates.
+- Add `POST /api/jobs/:id/analyze-eligibility`.
+- Show passed or failed eligibility state on the job detail page.
+- Disable resume generation when eligibility severity is blocked.
+
+## Phase 4: Job and Resume Storage
 
 - Add authentication.
 - Add job description CRUD.
@@ -39,20 +48,20 @@ Acceptance criteria:
 - Store formatted resume metadata.
 - Link resume versions to jobs.
 
-## Phase 4: Prompt Library
+## Phase 5: Prompt Library
 
 - Store Gemini prompts.
 - Add prompt versioning.
 - Assemble final prompt with JD and profile data.
 - Store prompt used for each resume version.
 
-## Phase 5: Resume Library and Application Tracker
+## Phase 6: Resume Library and Application Tracker
 
 - Add resume history.
 - Add application status workflow.
 - Add applied date, follow-up date, and notes.
 
-## Phase 6: Resume Validator
+## Phase 7: Resume Validator
 
 - Add eligibility checks.
 - Validate summary word count.
@@ -60,13 +69,13 @@ Acceptance criteria:
 - Validate skills sections.
 - Add basic JD keyword matching.
 
-## Phase 7: Focus Templates and Auto Detection
+## Phase 8: Focus Templates and Auto Detection
 
 - Add focus template storage.
 - Recommend focus from JD keywords.
 - Store focus used for each generated resume.
 
-## Phase 8: Direct Gemini Integration
+## Phase 9: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

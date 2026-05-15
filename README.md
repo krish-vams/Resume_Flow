@@ -96,3 +96,11 @@ npm run prisma:validate
 - Job status tracking from saved through offer or withdrawn
 - Job metadata fields for URL, location, type, description, and notes
 - Resume count and future analysis placeholders on job detail
+
+## Phase 3 Scope
+
+- Eligibility gatekeeper service for restricted JD terms
+- Automatic eligibility analysis on job creation and JD updates
+- Protected `POST /api/jobs/:id/analyze-eligibility`
+- Persisted `eligibilityFlagsJson` results on jobs
+- Job detail warnings and blocked resume-generation placeholder

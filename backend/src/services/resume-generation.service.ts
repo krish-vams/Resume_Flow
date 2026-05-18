@@ -217,7 +217,7 @@ export async function generateResume(userId: string, input: GenerateResumeInput)
     if (!resumeCreated) {
       await fs.unlink(generatedFilePath).catch((unlinkError: NodeJS.ErrnoException) => {
         if (unlinkError.code !== "ENOENT") {
-          throw unlinkError;
+          console.error("Unable to remove failed generated resume file", unlinkError);
         }
       });
     }

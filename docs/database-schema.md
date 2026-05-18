@@ -106,3 +106,5 @@ Phase 17 uses `Notification` for in-app reminders:
 - `Application.assessmentDueDate` supports assessment deadline reminders.
 
 Phase 18 dashboard analytics does not add new tables. It aggregates existing `Job`, `ResumeVersion`, `Application`, and `Notification` data for progress metrics, application charts, match score summaries, and follow-up counts.
+
+Phase 19 security hardening does not add new tables. Resume uploads now create the resume version and update the linked job status inside one transaction, while existing user-scoped queries continue to enforce object ownership.

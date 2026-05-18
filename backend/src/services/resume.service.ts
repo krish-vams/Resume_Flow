@@ -246,41 +246,43 @@ async function assertUserOwnedReferences(userId: string, input: UploadRawResumeI
 export async function uploadRawResume(userId: string, input: UploadRawResumeInput) {
   await assertUserOwnedReferences(userId, input);
 
-  const latestResume = await prisma.resumeVersion.findFirst({
-    where: {
-      jobId: input.jobId
-    },
-    orderBy: {
-      version: "desc"
-    },
-    select: {
-      version: true
-    }
-  });
-  const version = (latestResume?.version ?? 0) + 1;
+  return prisma.$transaction(async (transaction) => {
+    const latestResume = await transaction.resumeVersion.findFirst({
+      where: {
+        jobId: input.jobId
+      },
+      orderBy: {
+        version: "desc"
+      },
+      select: {
+        version: true
+      }
+    });
+    const version = (latestResume?.version ?? 0) + 1;
 
-  const resume = await prisma.resumeVersion.create({
-    data: {
-      userId,
-      jobId: input.jobId,
-      candidateProfileId: input.candidateProfileId,
-      promptTemplateId: input.promptTemplateId,
-      focusTemplateId: input.focusTemplateId,
-      resumeName: input.resumeName,
-      rawResumeText: input.rawResumeText,
-      rawResumeFileUrl: toStorageKey(input.rawResumeFilePath),
-      version,
-      status: "Raw Uploaded"
-    },
-    select: resumeSelect
-  });
+    const resume = await transaction.resumeVersion.create({
+      data: {
+        userId,
+        jobId: input.jobId,
+        candidateProfileId: input.candidateProfileId,
+        promptTemplateId: input.promptTemplateId,
+        focusTemplateId: input.focusTemplateId,
+        resumeName: input.resumeName,
+        rawResumeText: input.rawResumeText,
+        rawResumeFileUrl: toStorageKey(input.rawResumeFilePath),
+        version,
+        status: "Raw Uploaded"
+      },
+      select: resumeSelect
+    });
 
-  await prisma.job.update({
-    where: { id: input.jobId },
-    data: { status: JobStatus.RESUME_GENERATED }
-  });
+    await transaction.job.update({
+      where: { id: input.jobId },
+      data: { status: JobStatus.RESUME_GENERATED }
+    });
 
-  return resume;
+    return resume;
+  });
 }
 
 export async function listResumes(userId: string, jobId?: string) {

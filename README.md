@@ -229,3 +229,12 @@ npm run prisma:validate
 - Metrics for saved jobs, generated resumes, submitted applications, interviews, assessments, rejections, offers, ghosted applications, match score, response rate, interview rate, and follow-ups due
 - Dashboard charts for application status distribution and recent submitted applications
 - Upcoming reminders loaded from the dashboard summary response
+
+## Phase 19 Scope
+
+- Rate limits on authentication, upload, generation, formatting, and PDF export routes
+- Stronger upload validation for file size, extension, MIME type, and sanitized stored filenames
+- Production guard that rejects the default or weak `JWT_SECRET`
+- Formatter-service upload size and DOCX extension checks
+- Safer upload cleanup, private generated-file downloads, and transaction-backed resume version creation
+- Generic server errors without stack traces in API responses

@@ -6,10 +6,43 @@ import { env } from "../config/env";
 const focusTemplateUploadPath = path.join(env.LOCAL_STORAGE_PATH, "focus-templates");
 const rawResumeUploadPath = path.join(env.LOCAL_STORAGE_PATH, "raw-resumes");
 const referenceUploadPath = path.join(env.LOCAL_STORAGE_PATH, "reference-files");
+const megabyte = 1024 * 1024;
+
+const uploadSizeLimits = {
+  focusTemplate: 10 * megabyte,
+  rawResume: 10 * megabyte,
+  referenceFile: 15 * megabyte
+};
+
+const focusTemplateFileTypes = new Map([
+  [".docx", new Set(["application/vnd.openxmlformats-officedocument.wordprocessingml.document"])],
+  [".doc", new Set(["application/msword"])],
+  [".pdf", new Set(["application/pdf"])],
+  [".txt", new Set(["text/plain"])]
+]);
+
+const referenceFileTypes = new Map([
+  [".xlsx", new Set(["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/octet-stream"])]
+]);
 
 fs.mkdirSync(focusTemplateUploadPath, { recursive: true });
 fs.mkdirSync(rawResumeUploadPath, { recursive: true });
 fs.mkdirSync(referenceUploadPath, { recursive: true });
+
+function safeOriginalName(originalName: string) {
+  return originalName.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-").slice(0, 140) || "upload";
+}
+
+function hasAllowedFileType(file: Express.Multer.File, allowedTypes: Map<string, Set<string>>) {
+  const extension = path.extname(file.originalname).toLowerCase();
+  const allowedMimeTypes = allowedTypes.get(extension);
+
+  return Boolean(allowedMimeTypes?.has(file.mimetype));
+}
+
+function rejectFile(callback: multer.FileFilterCallback, message: string) {
+  callback(new Error(message));
+}
 
 const storage = multer.diskStorage({
   destination: (_request, _file, callback) => {
@@ -17,30 +50,22 @@ const storage = multer.diskStorage({
   },
   filename: (_request, file, callback) => {
     const timestamp = Date.now();
-    const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "-");
-    callback(null, `${timestamp}-${safeOriginalName}`);
+    callback(null, `${timestamp}-${safeOriginalName(file.originalname)}`);
   }
 });
 
 export const uploadFocusTemplateFile = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024
+    fileSize: uploadSizeLimits.focusTemplate
   },
   fileFilter: (_request, file, callback) => {
-    const allowedMimeTypes = new Set([
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/msword",
-      "application/pdf",
-      "text/plain"
-    ]);
-
-    if (allowedMimeTypes.has(file.mimetype)) {
+    if (hasAllowedFileType(file, focusTemplateFileTypes)) {
       callback(null, true);
       return;
     }
 
-    callback(new Error("Focused resume file must be DOCX, DOC, PDF, or TXT"));
+    rejectFile(callback, "Focused resume file must be DOCX, DOC, PDF, or TXT");
   }
 });
 
@@ -53,15 +78,14 @@ const rawResumeStorage = multer.diskStorage({
   },
   filename: (_request, file, callback) => {
     const timestamp = Date.now();
-    const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "-");
-    callback(null, `${timestamp}-${safeOriginalName}`);
+    callback(null, `${timestamp}-${safeOriginalName(file.originalname)}`);
   }
 });
 
 export const uploadRawResumeFile = multer({
   storage: rawResumeStorage,
   limits: {
-    fileSize: 10 * 1024 * 1024
+    fileSize: uploadSizeLimits.rawResume
   },
   fileFilter: (_request, file, callback) => {
     const isDocxMime =
@@ -73,7 +97,7 @@ export const uploadRawResumeFile = multer({
       return;
     }
 
-    callback(new Error("Raw resume file must be a DOCX file"));
+    rejectFile(callback, "Raw resume file must be a DOCX file");
   }
 });
 
@@ -86,28 +110,21 @@ const referenceStorage = multer.diskStorage({
   },
   filename: (_request, file, callback) => {
     const timestamp = Date.now();
-    const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "-");
-    callback(null, `${timestamp}-${safeOriginalName}`);
+    callback(null, `${timestamp}-${safeOriginalName(file.originalname)}`);
   }
 });
 
 export const uploadReferenceFile = multer({
   storage: referenceStorage,
   limits: {
-    fileSize: 15 * 1024 * 1024
+    fileSize: uploadSizeLimits.referenceFile
   },
   fileFilter: (_request, file, callback) => {
-    const allowedMimeTypes = new Set([
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/octet-stream"
-    ]);
-    const isXlsxExtension = path.extname(file.originalname).toLowerCase() === ".xlsx";
-
-    if (isXlsxExtension && allowedMimeTypes.has(file.mimetype)) {
+    if (hasAllowedFileType(file, referenceFileTypes)) {
       callback(null, true);
       return;
     }
 
-    callback(new Error("Reference file must be an XLSX file"));
+    rejectFile(callback, "Reference file must be an XLSX file");
   }
 });

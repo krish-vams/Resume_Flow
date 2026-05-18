@@ -17,16 +17,33 @@ from app.formatter.schemas import CandidateProfile, FormatResult, PdfExportResul
 
 OUTPUT_DIR = Path(os.getenv("FORMATTER_OUTPUT_DIR", "./outputs"))
 BASE_TEMPLATE_PATH = os.getenv("BASE_RESUME_TEMPLATE_PATH")
+MAX_UPLOAD_BYTES = int(os.getenv("FORMATTER_MAX_UPLOAD_BYTES", str(10 * 1024 * 1024)))
 
 
-async def save_upload(upload: UploadFile) -> Path:
+def validate_upload_extension(upload: UploadFile, allowed_suffixes: set[str]) -> str:
     suffix = Path(upload.filename or "raw_resume.docx").suffix or ".docx"
+
+    if suffix.lower() not in allowed_suffixes:
+        allowed = ", ".join(sorted(allowed_suffixes))
+        raise FormatterParseError(f"Uploaded file must use one of these extensions: {allowed}")
+
+    return suffix
+
+
+async def save_upload(upload: UploadFile, allowed_suffixes: set[str]) -> Path:
+    suffix = validate_upload_extension(upload, allowed_suffixes)
     temporary = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     temporary_path = Path(temporary.name)
+    bytes_written = 0
 
     try:
         with temporary:
             while chunk := await upload.read(1024 * 1024):
+                bytes_written += len(chunk)
+
+                if bytes_written > MAX_UPLOAD_BYTES:
+                    raise FormatterParseError("Uploaded file is too large")
+
                 temporary.write(chunk)
     except Exception:
         temporary_path.unlink(missing_ok=True)
@@ -52,7 +69,7 @@ async def format_resume(
 
     try:
         candidate_profile = parse_candidate_profile(candidate_profile_json)
-        raw_path = await save_upload(raw_resume_file)
+        raw_path = await save_upload(raw_resume_file, {".docx"})
         parsed_resume = parse_raw_resume(raw_path)
         output_path = render_resume(
             parsed_resume=parsed_resume,
@@ -86,7 +103,7 @@ async def export_pdf(formatted_docx_file: UploadFile, output_name: str) -> PdfEx
 
     try:
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        docx_path = await save_upload(formatted_docx_file)
+        docx_path = await save_upload(formatted_docx_file, {".docx"})
         safe_output_name = Path(output_name).stem or docx_path.stem
         conversion_input = docx_path.with_name(f"{safe_output_name}.docx")
         docx_path.replace(conversion_input)

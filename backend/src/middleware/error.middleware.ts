@@ -13,15 +13,20 @@ export const errorMiddleware: ErrorRequestHandler = (error, _request, response, 
   }
 
   if (error instanceof HttpError) {
-    response.status(error.statusCode).json({
-      message: error.message,
-      details: error.details
-    });
+    response.status(error.statusCode).json(
+      error.details !== undefined && error.statusCode < 500
+        ? {
+            message: error.message,
+            details: error.details
+          }
+        : { message: error.message }
+    );
     return;
   }
 
   if (error instanceof multer.MulterError) {
-    response.status(400).json({ message: error.message });
+    const message = error.code === "LIMIT_FILE_SIZE" ? "Uploaded file is too large" : "Upload failed";
+    response.status(400).json({ message });
     return;
   }
 

@@ -37,16 +37,19 @@ async def export_pdf_endpoint(
 
 @app.get("/outputs/{file_name}")
 def download_output(file_name: str) -> FileResponse:
+    if Path(file_name).name != file_name or Path(file_name).suffix.lower() not in {".docx", ".pdf"}:
+        raise HTTPException(status_code=404, detail="Formatted output not found")
+
     output_root = OUTPUT_DIR.resolve()
     output_path = (output_root / file_name).resolve()
 
     try:
         output_path.relative_to(output_root)
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail="Formatted DOCX not found") from exc
+        raise HTTPException(status_code=404, detail="Formatted output not found") from exc
 
     if not output_path.exists():
-        raise HTTPException(status_code=404, detail="Formatted DOCX not found")
+        raise HTTPException(status_code=404, detail="Formatted output not found")
 
     media_type = (
         "application/pdf"

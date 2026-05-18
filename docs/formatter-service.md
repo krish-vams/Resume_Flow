@@ -62,4 +62,6 @@ Known formatter errors include:
 
 `BASE_RESUME_TEMPLATE_PATH` can point to a DOCX template. If set and missing, the formatter returns `Base Template Missing`; otherwise it renders with a generated DOCX style.
 
+`FORMATTER_MAX_UPLOAD_BYTES` caps formatter uploads and defaults to 10 MB. Formatter endpoints only accept DOCX uploads for raw formatting and PDF export input.
+
 PDF export requires `libreoffice` or `soffice` on the formatter service PATH.

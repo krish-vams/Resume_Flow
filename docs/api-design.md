@@ -78,3 +78,4 @@ Phase 15 implements server-side Gemini resume generation with automatic raw resu
 Phase 16 implements Gmail OAuth, job-email scanning, detection review, confirmed status updates, and job-detail email visibility.
 Phase 17 implements application-linked in-app notifications for follow-ups, interviews, and assessment deadlines.
 Phase 18 implements dashboard analytics with real metrics, simple charts, and upcoming reminders from `GET /api/dashboard/summary`.
+Phase 19 adds in-memory route rate limits for auth, upload, generation, formatting, and PDF export routes without changing the public API contract.

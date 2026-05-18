@@ -196,6 +196,18 @@ Acceptance criteria:
 - Show metric cards and simple charts on `/dashboard`.
 - Keep upcoming reminders available on the dashboard from the summary response.
 
-## Phase 19: Background Jobs
+## Phase 19: Security and Production Hardening
+
+- Rate limit authentication, upload, generation, formatting, and PDF export routes.
+- Keep object access scoped to the authenticated user.
+- Validate upload extension, MIME type, stored filename, and size.
+- Keep generated resume files behind authenticated download routes.
+- Reject weak or default JWT secrets in production.
+- Ensure formatter uploads reject oversized and non-DOCX inputs.
+- Store formatter and validation failures as user-facing statuses where possible.
+- Use database transactions for resume version creation plus linked job status updates.
+- Return generic 500 responses without stack traces.
+
+## Phase 20: Background Jobs
 
 - Move generation, formatting, PDF export, match analysis, and Gmail scanning into queued jobs.

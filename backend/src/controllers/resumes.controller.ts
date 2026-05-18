@@ -33,6 +33,14 @@ function getResumeId(request: Request) {
   return id;
 }
 
+async function removeUploadedFile(filePath: string) {
+  await fs.unlink(filePath).catch((unlinkError: NodeJS.ErrnoException) => {
+    if (unlinkError.code !== "ENOENT") {
+      console.error("Unable to remove failed upload", unlinkError);
+    }
+  });
+}
+
 export async function uploadRawResumeRecord(request: Request, response: Response) {
   if (!request.file) {
     throw new HttpError(400, "Raw resume DOCX file is required");
@@ -50,11 +58,7 @@ export async function uploadRawResumeRecord(request: Request, response: Response
 
     response.status(201).json({ resume });
   } catch (error) {
-    await fs.unlink(request.file.path).catch((unlinkError: NodeJS.ErrnoException) => {
-      if (unlinkError.code !== "ENOENT") {
-        throw unlinkError;
-      }
-    });
+    await removeUploadedFile(request.file.path);
     throw error;
   }
 }

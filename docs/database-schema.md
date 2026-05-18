@@ -13,6 +13,9 @@ The initial Prisma schema includes:
 - `ResumeValidation`
 - `ResumeMatchAnalysis`
 - `Application`
+- `GmailIntegration`
+- `JobEmail`
+- `EmailDetection`
 
 The schema favors JSON fields for fast MVP iteration where data structures may change, such as extracted skills, education, certifications, validation reports, and reference metadata.
 
@@ -85,3 +88,10 @@ Phase 13 uses `ResumeMatchAnalysis` for stored resume-to-JD alignment results:
 - Matched and missing required/preferred skills are stored as JSON arrays.
 - Cloud/DevOps, database, framework, and reference keyword coverage are stored as JSON objects.
 - `suggestionsJson` stores realistic improvement guidance for the resume detail page.
+
+Phase 16 uses Gmail tables for job-email tracking:
+
+- `GmailIntegration` stores the connected Gmail account and encrypted OAuth tokens.
+- `JobEmail` stores likely job-related Gmail messages and optional links to saved jobs.
+- `EmailDetection` stores the detected email type, suggested status, confidence, and user decision.
+- Confirming a detection can update the linked job and application status; ignored detections are retained for auditability.

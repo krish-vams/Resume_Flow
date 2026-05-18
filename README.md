@@ -203,3 +203,13 @@ npm run prisma:validate
 - Automatic validation after generation
 - Automatic formatting when validation passes or warnings are accepted
 - Job detail button for one-click resume generation
+
+## Phase 16 Scope
+
+- Gmail OAuth connection using backend-only client credentials
+- Encrypted Gmail token storage
+- Protected Gmail scan and detection review APIs
+- Detection for recruiter replies, interviews, assessments, offers, rejections, and application confirmations
+- User confirmation before job or application status changes
+- Gmail review page at `/gmail`
+- Linked Gmail emails shown on job detail pages

@@ -14,6 +14,9 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
   GEMINI_API_BASE_URL: z.string().url().default("https://generativelanguage.googleapis.com"),
+  GMAIL_CLIENT_ID: z.string().optional(),
+  GMAIL_CLIENT_SECRET: z.string().optional(),
+  GMAIL_REDIRECT_URI: z.string().url().default("http://localhost:4000/api/gmail/callback"),
   REDIS_URL: z.string().min(1).default("redis://localhost:6380"),
   STORAGE_PROVIDER: z.enum(["local", "s3", "supabase"]).default("local"),
   LOCAL_STORAGE_PATH: z.string().min(1).default("./uploads")

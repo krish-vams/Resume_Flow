@@ -61,6 +61,8 @@ model User {
   referenceFiles       ReferenceFile[]
   resumeVersions       ResumeVersion[]
   applications         Application[]
+  gmailIntegration     GmailIntegration?
+  jobEmails            JobEmail[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 }
@@ -109,6 +111,7 @@ model Job {
   recommendedFocusTemplate   ResumeFocusTemplate? @relation(fields: [recommendedFocusTemplateId], references: [id])
   resumeVersions             ResumeVersion[]
   applications               Application[]
+  jobEmails                  JobEmail[]
   createdAt                  DateTime             @default(now())
   updatedAt                  DateTime             @updatedAt
 
@@ -279,4 +282,62 @@ model Application {
 
   @@index([userId, status])
   @@index([followUpDate])
+}
+
+model GmailIntegration {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  gmailEmail          String?
+  accessTokenEnc      String?
+  refreshTokenEnc     String?
+  tokenExpiresAt      DateTime?
+  scope               String?
+  connectedAt         DateTime  @default(now())
+  lastScanAt          DateTime?
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model JobEmail {
+  id              String           @id @default(cuid())
+  userId          String
+  jobId           String?
+  gmailMessageId  String
+  gmailThreadId   String?
+  fromEmail       String?
+  subject         String
+  snippet         String?
+  receivedAt      DateTime?
+  detectionType   String
+  suggestedStatus JobStatus?
+  confidence      Int              @default(0)
+  reason          String?
+  decisionStatus  String           @default("PENDING")
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job             Job?             @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  detections      EmailDetection[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([userId, gmailMessageId])
+  @@index([userId, decisionStatus])
+  @@index([jobId])
+}
+
+model EmailDetection {
+  id              String     @id @default(cuid())
+  jobEmailId      String
+  detectionType   String
+  suggestedStatus JobStatus?
+  confidence      Int        @default(0)
+  reason          String?
+  decisionStatus  String     @default("PENDING")
+  confirmedAt     DateTime?
+  ignoredAt       DateTime?
+  jobEmail        JobEmail   @relation(fields: [jobEmailId], references: [id], onDelete: Cascade)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([decisionStatus])
 }

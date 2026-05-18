@@ -167,6 +167,17 @@ Acceptance criteria:
 - Return generated resume, validation, formatted DOCX state, and any formatter error clearly.
 - Add a job detail action for one-click Gemini resume generation.
 
-## Phase 16: Background Jobs
+## Phase 16: Gmail Integration for Job Emails
+
+- Add Gmail OAuth connection with backend-only client credentials.
+- Store Gmail tokens encrypted at rest.
+- Add protected Gmail status, scan, detection list, confirm, and ignore routes.
+- Scan recent Gmail messages for recruiter replies, interviews, assessments, offers, rejections, and application confirmations.
+- Link detected emails to saved jobs by company and role text matching.
+- Require user confirmation before updating job or application status.
+- Show important linked emails in each job detail page.
+- Add `/gmail` for connection, scanning, review, confirm, and ignore actions.
+
+## Phase 17: Background Jobs
 
 - Move generation, formatting, PDF export, match analysis, and Gmail scanning into queued jobs.

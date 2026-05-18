@@ -31,6 +31,14 @@ Initial route groups:
 - `GET /api/focus-templates/:id`
 - `PUT /api/focus-templates/:id`
 - `DELETE /api/focus-templates/:id`
+- `GET /api/gmail/connect`
+- `GET /api/gmail/callback`
+- `GET /api/gmail/status`
+- `POST /api/gmail/scan`
+- `GET /api/gmail/detections`
+- `POST /api/gmail/detections/:id/confirm`
+- `POST /api/gmail/detections/:id/ignore`
+- `GET /api/gmail/jobs/:id/emails`
 - `POST /api/resumes/upload-raw`
 - `POST /api/resumes/generate`
 - `GET /api/resumes`
@@ -63,3 +71,4 @@ Phase 12 implements reference file upload, Excel row parsing, reference entry se
 Phase 13 implements resume-to-JD match analysis, saved match scores, missing skill reporting, and suggestions.
 Phase 14 implements PDF export from formatted DOCX files through the formatter service and authenticated PDF downloads.
 Phase 15 implements server-side Gemini resume generation with automatic raw resume storage, validation, and formatting.
+Phase 16 implements Gmail OAuth, job-email scanning, detection review, confirmed status updates, and job-detail email visibility.

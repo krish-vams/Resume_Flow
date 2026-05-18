@@ -15,6 +15,11 @@ import {
   type JobRecord,
 } from "@/lib/jobs";
 import type { ResumeFocusTemplate } from "@/lib/focus-templates";
+import {
+  formatDetectionType,
+  formatSuggestedStatus,
+  type JobEmailRecord,
+} from "@/lib/gmail";
 import type { PromptTemplate } from "@/lib/prompts";
 import {
   formatValidationStatus,
@@ -37,6 +42,7 @@ export default function JobDetailPage() {
   const [candidateProfiles, setCandidateProfiles] = useState<CandidateProfileSummary[]>([]);
   const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
   const [resumes, setResumes] = useState<ResumeVersionRecord[]>([]);
+  const [jobEmails, setJobEmails] = useState<JobEmailRecord[]>([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +53,7 @@ export default function JobDetailPage() {
   const [formattingResumeId, setFormattingResumeId] = useState<string | null>(null);
   const [validatingResumeId, setValidatingResumeId] = useState<string | null>(null);
   const [exportingPdfResumeId, setExportingPdfResumeId] = useState<string | null>(null);
+  const [workingEmailDetectionId, setWorkingEmailDetectionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) {
@@ -59,13 +66,15 @@ export default function JobDetailPage() {
       apiFetch<{ profiles: CandidateProfileSummary[] }>("/api/candidate-profiles"),
       apiFetch<{ prompts: PromptTemplate[] }>("/api/prompts"),
       apiFetch<{ resumes: ResumeVersionRecord[] }>(`/api/resumes?jobId=${jobId}`),
+      apiFetch<{ jobEmails: JobEmailRecord[] }>(`/api/gmail/jobs/${jobId}/emails`),
     ])
-      .then(([jobPayload, focusTemplatePayload, candidateProfilePayload, promptPayload, resumePayload]) => {
+      .then(([jobPayload, focusTemplatePayload, candidateProfilePayload, promptPayload, resumePayload, jobEmailPayload]) => {
         setJob(jobPayload.job);
         setFocusTemplates(focusTemplatePayload.focusTemplates);
         setCandidateProfiles(candidateProfilePayload.profiles);
         setPrompts(promptPayload.prompts);
         setResumes(resumePayload.resumes);
+        setJobEmails(jobEmailPayload.jobEmails);
       })
       .catch(() => router.push("/jobs"))
       .finally(() => setIsLoading(false));
@@ -385,6 +394,31 @@ export default function JobDetailPage() {
     }
   }
 
+  async function decideEmailDetection(detectionId: string, action: "confirm" | "ignore") {
+    if (!job) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setWorkingEmailDetectionId(detectionId);
+
+    try {
+      await apiFetch<{ jobEmails: JobEmailRecord[] }>(`/api/gmail/detections/${detectionId}/${action}`, {
+        method: "POST",
+      });
+      const response = await apiFetch<{ jobEmails: JobEmailRecord[] }>(`/api/gmail/jobs/${job.id}/emails`);
+      const jobResponse = await apiFetch<{ job: JobRecord }>(`/api/jobs/${job.id}`);
+      setJobEmails(response.jobEmails);
+      setJob(jobResponse.job);
+      setMessage(action === "confirm" ? "Email detection confirmed" : "Email detection ignored");
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to update email detection");
+    } finally {
+      setWorkingEmailDetectionId(null);
+    }
+  }
+
   if (isLoading) {
     return <main className="min-h-screen bg-[#f7f7f4] p-6 text-[#1f2933]">Loading...</main>;
   }
@@ -665,6 +699,56 @@ export default function JobDetailPage() {
         </div>
 
         <aside className="space-y-5">
+          <section className="rounded-md border border-[#d9d6cc] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-[#17212b]">Gmail Emails</h2>
+              <Link className="text-sm font-medium text-[#264653]" href="/gmail">
+                Scan
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {jobEmails.slice(0, 5).map((email) => {
+                const detection = email.detections[0];
+
+                return (
+                  <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3" key={email.id}>
+                    <p className="text-sm font-medium text-[#17212b]">{email.subject}</p>
+                    <p className="mt-1 text-xs text-[#65707a]">{email.fromEmail ?? "Unknown sender"}</p>
+                    <p className="mt-2 line-clamp-3 text-sm leading-5 text-[#38434f]">{email.snippet}</p>
+                    <p className="mt-2 text-xs text-[#65707a]">
+                      {formatDetectionType(email.detectionType)} - {formatSuggestedStatus(email.suggestedStatus)}
+                    </p>
+                    {detection && email.decisionStatus === "PENDING" ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          className="h-8 rounded-md bg-[#264653] px-3 text-xs font-medium text-white hover:bg-[#1f3944] disabled:opacity-60"
+                          disabled={workingEmailDetectionId === detection.id}
+                          onClick={() => decideEmailDetection(detection.id, "confirm")}
+                          type="button"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          className="h-8 rounded-md border border-[#cfcabf] px-3 text-xs font-medium hover:bg-white disabled:opacity-60"
+                          disabled={workingEmailDetectionId === detection.id}
+                          onClick={() => decideEmailDetection(detection.id, "ignore")}
+                          type="button"
+                        >
+                          Ignore
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-xs font-medium text-[#65707a]">{email.decisionStatus}</p>
+                    )}
+                  </div>
+                );
+              })}
+              {jobEmails.length === 0 ? (
+                <p className="text-sm text-[#65707a]">No Gmail emails linked to this job yet.</p>
+              ) : null}
+            </div>
+          </section>
+
           <section className="rounded-md border border-[#d9d6cc] bg-white p-5">
             <h2 className="text-lg font-semibold text-[#17212b]">Status</h2>
             <form className="mt-4 space-y-4" onSubmit={handleSubmit}>

@@ -113,6 +113,15 @@ export default function DashboardPage() {
             Upload Excel writing guides, parse reference rows, search examples, and use selected context in prompts.
           </p>
         </Link>
+        <Link
+          className="rounded-md border border-[#d9d6cc] bg-white p-5 hover:border-[#264653]"
+          href="/gmail"
+        >
+          <h2 className="text-lg font-semibold text-[#17212b]">Gmail Job Emails</h2>
+          <p className="mt-2 text-sm leading-6 text-[#65707a]">
+            Connect Gmail, scan job-related emails, and confirm recruiter, interview, assessment, or rejection updates.
+          </p>
+        </Link>
         <div className="rounded-md border border-[#d9d6cc] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#17212b]">Workflow status</h2>
           <p className="mt-2 text-sm leading-6 text-[#65707a]">

@@ -16,7 +16,11 @@ import {
   validateResumeVersion
 } from "../services/resume-validation.service";
 import { analyzeResumeMatch } from "../services/resume-match.service";
-import { uploadRawResumeSchema } from "../validators/resume.validators";
+import { generateResume } from "../services/resume-generation.service";
+import {
+  generateResumeSchema,
+  uploadRawResumeSchema
+} from "../validators/resume.validators";
 import { HttpError } from "../utils/http-error";
 
 function getResumeId(request: Request) {
@@ -60,6 +64,24 @@ export async function listResumeRecords(request: Request, response: Response) {
   const resumes = await listResumes(request.user!.id, jobId);
 
   response.json({ resumes });
+}
+
+export async function generateResumeRecord(request: Request, response: Response) {
+  const input = generateResumeSchema.parse(request.body);
+  const result = await generateResume(request.user!.id, {
+    ...input,
+    focusTemplateId: input.focusTemplateId || undefined
+  });
+
+  response.status(201).json({
+    resumeVersionId: result.resume.id,
+    status: result.status,
+    validationStatus: result.validationStatus,
+    formattedDocxUrl: result.formattedDocxUrl,
+    formatError: result.formatError,
+    validation: result.validation,
+    resume: result.resume
+  });
 }
 
 export async function getResumeRecord(request: Request, response: Response) {

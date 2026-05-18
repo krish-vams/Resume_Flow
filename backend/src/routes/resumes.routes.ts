@@ -6,6 +6,7 @@ import {
   downloadRawResumeRecord,
   exportResumePdfRecord,
   formatResumeRecord,
+  generateResumeRecord,
   getResumeValidationRecord,
   getResumeRecord,
   listResumeRecords,
@@ -21,6 +22,7 @@ export const resumesRouter = Router();
 
 resumesRouter.use(requireAuth);
 resumesRouter.post("/upload-raw", uploadRawResumeFile.single("rawResumeFile"), asyncHandler(uploadRawResumeRecord));
+resumesRouter.post("/generate", asyncHandler(generateResumeRecord));
 resumesRouter.get("/", asyncHandler(listResumeRecords));
 resumesRouter.get("/:id/download-raw", asyncHandler(downloadRawResumeRecord));
 resumesRouter.get("/:id/download-formatted", asyncHandler(downloadFormattedResumeRecord));

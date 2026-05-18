@@ -32,6 +32,7 @@ Initial route groups:
 - `PUT /api/focus-templates/:id`
 - `DELETE /api/focus-templates/:id`
 - `POST /api/resumes/upload-raw`
+- `POST /api/resumes/generate`
 - `GET /api/resumes`
 - `GET /api/resumes/:id`
 - `GET /api/resumes/:id/download-raw`
@@ -61,3 +62,4 @@ Phase 1 implements auth routes and candidate profile CRUD. Phase 2 implements pr
 Phase 12 implements reference file upload, Excel row parsing, reference entry search, and optional reference context in prompt assembly.
 Phase 13 implements resume-to-JD match analysis, saved match scores, missing skill reporting, and suggestions.
 Phase 14 implements PDF export from formatted DOCX files through the formatter service and authenticated PDF downloads.
+Phase 15 implements server-side Gemini resume generation with automatic raw resume storage, validation, and formatting.

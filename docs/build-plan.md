@@ -156,5 +156,17 @@ Acceptance criteria:
 
 ## Phase 15: Direct Gemini Integration
 
-- Add Gemini API integration.
-- Run generation, validation, formatting, and storage as one workflow.
+- Add backend-only Gemini API configuration through `GEMINI_API_KEY`.
+- Add protected `POST /api/resumes/generate`.
+- Assemble a generation prompt from prompt template, candidate profile, focus template, and target JD.
+- Send the prompt to Gemini from the backend only.
+- Store Gemini raw resume text on `ResumeVersion.rawResumeText`.
+- Convert Gemini text into a raw DOCX file for the existing formatter workflow.
+- Run resume validation automatically after generation.
+- Run the formatter automatically when validation passes or warnings are accepted by request.
+- Return generated resume, validation, formatted DOCX state, and any formatter error clearly.
+- Add a job detail action for one-click Gemini resume generation.
+
+## Phase 16: Background Jobs
+
+- Move generation, formatting, PDF export, match analysis, and Gmail scanning into queued jobs.

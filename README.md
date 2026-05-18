@@ -193,3 +193,13 @@ npm run prisma:validate
 - Private PDF storage through `ResumeVersion.formattedPdfUrl`
 - Authenticated `GET /api/resumes/:id/download-pdf`
 - PDF export and download controls in resume detail, resume library, and job detail resume lists
+
+## Phase 15 Scope
+
+- Server-side Gemini API integration using `GEMINI_API_KEY`
+- Protected `POST /api/resumes/generate`
+- Prompt assembly from job, candidate profile, prompt template, and focus template
+- Generated raw resume text and raw DOCX storage
+- Automatic validation after generation
+- Automatic formatting when validation passes or warnings are accepted
+- Job detail button for one-click resume generation

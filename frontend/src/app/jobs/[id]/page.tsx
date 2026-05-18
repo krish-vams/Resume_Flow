@@ -43,6 +43,7 @@ export default function JobDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingResume, setIsGeneratingResume] = useState(false);
   const [formattingResumeId, setFormattingResumeId] = useState<string | null>(null);
   const [validatingResumeId, setValidatingResumeId] = useState<string | null>(null);
   const [exportingPdfResumeId, setExportingPdfResumeId] = useState<string | null>(null);
@@ -253,6 +254,67 @@ export default function JobDetailPage() {
     }
   }
 
+  async function handleGenerateResume(form: HTMLFormElement | null) {
+    if (!form || !job) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setIsGeneratingResume(true);
+
+    const formData = new FormData(form);
+    const candidateProfileId = String(formData.get("candidateProfileId") ?? "");
+    const promptTemplateId = String(formData.get("promptTemplateId") ?? "");
+    const focusTemplateId = String(formData.get("focusTemplateId") ?? "");
+
+    if (!candidateProfileId || !promptTemplateId) {
+      setError("Select a candidate profile and prompt template before generating.");
+      setIsGeneratingResume(false);
+      return;
+    }
+
+    try {
+      const response = await apiFetch<{
+        resume: ResumeVersionRecord;
+        status: string;
+        validationStatus: string;
+        formatError?: string;
+      }>("/api/resumes/generate", {
+        method: "POST",
+        json: {
+          jobId: job.id,
+          candidateProfileId,
+          promptTemplateId,
+          focusTemplateId: focusTemplateId || undefined,
+          formatOnWarning: true,
+        },
+      });
+      setResumes((currentResumes) => [response.resume, ...currentResumes]);
+      setJob((currentJob) =>
+        currentJob
+          ? {
+              ...currentJob,
+              status: "RESUME_GENERATED",
+              _count: {
+                ...currentJob._count,
+                resumeVersions: currentJob._count.resumeVersions + 1,
+              },
+            }
+          : currentJob
+      );
+      setMessage(
+        response.formatError
+          ? `Generated resume v${response.resume.version}, but formatting needs review: ${response.formatError}`
+          : `Generated resume v${response.resume.version} - ${response.status}`
+      );
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to generate resume");
+    } finally {
+      setIsGeneratingResume(false);
+    }
+  }
+
   async function handleExportPdf(resume: ResumeVersionRecord) {
     setError("");
     setMessage("");
@@ -453,13 +515,23 @@ export default function JobDetailPage() {
                 />
               </label>
               <div className="md:col-span-2">
-                <button
-                  className="h-10 rounded-md bg-[#264653] px-4 text-sm font-medium text-white hover:bg-[#1f3944] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
-                  disabled={isResumeGenerationBlocked || isUploading}
-                  type="submit"
-                >
-                  {isUploading ? "Uploading..." : "Upload raw resume"}
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="h-10 rounded-md bg-[#264653] px-4 text-sm font-medium text-white hover:bg-[#1f3944] disabled:cursor-not-allowed disabled:bg-[#9ca3af]"
+                    disabled={isResumeGenerationBlocked || isUploading}
+                    type="submit"
+                  >
+                    {isUploading ? "Uploading..." : "Upload raw resume"}
+                  </button>
+                  <button
+                    className="h-10 rounded-md border border-[#cfcabf] px-4 text-sm font-medium hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isResumeGenerationBlocked || isGeneratingResume}
+                    onClick={(event) => handleGenerateResume(event.currentTarget.form)}
+                    type="button"
+                  >
+                    {isGeneratingResume ? "Generating..." : "Generate with Gemini"}
+                  </button>
+                </div>
               </div>
             </form>
             {isResumeGenerationBlocked ? (

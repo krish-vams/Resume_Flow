@@ -11,6 +11,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1).default("change-me-in-local-env"),
   JWT_EXPIRES_IN: z.string().min(1).default("7d"),
   FORMATTER_SERVICE_URL: z.string().url().default("http://localhost:8000"),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
+  GEMINI_API_BASE_URL: z.string().url().default("https://generativelanguage.googleapis.com"),
   REDIS_URL: z.string().min(1).default("redis://localhost:6380"),
   STORAGE_PROVIDER: z.enum(["local", "s3", "supabase"]).default("local"),
   LOCAL_STORAGE_PATH: z.string().min(1).default("./uploads")

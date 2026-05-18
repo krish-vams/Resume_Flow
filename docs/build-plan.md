@@ -188,6 +188,14 @@ Acceptance criteria:
 - Allow users to mark notifications as read.
 - Show assessment deadline fields in the application tracker.
 
-## Phase 18: Background Jobs
+## Phase 18: Dashboard Analytics
+
+- Add protected `GET /api/dashboard/summary`.
+- Calculate saved jobs, generated resumes, submitted applications, interviews, assessments, rejections, offers, ghosted applications, average match score, response rate, interview rate, and follow-ups due from persisted data.
+- Return chart-ready application status distribution and recent daily application counts.
+- Show metric cards and simple charts on `/dashboard`.
+- Keep upcoming reminders available on the dashboard from the summary response.
+
+## Phase 19: Background Jobs
 
 - Move generation, formatting, PDF export, match analysis, and Gmail scanning into queued jobs.

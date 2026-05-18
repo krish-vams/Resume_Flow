@@ -104,3 +104,5 @@ Phase 17 uses `Notification` for in-app reminders:
 - `dueAt` powers upcoming reminder views on the dashboard.
 - `read` lets users clear reminders without deleting the audit trail.
 - `Application.assessmentDueDate` supports assessment deadline reminders.
+
+Phase 18 dashboard analytics does not add new tables. It aggregates existing `Job`, `ResumeVersion`, `Application`, and `Notification` data for progress metrics, application charts, match score summaries, and follow-up counts.

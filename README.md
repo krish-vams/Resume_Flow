@@ -222,3 +222,10 @@ npm run prisma:validate
 - Dashboard upcoming reminders panel
 - Mark individual notifications as read
 - Notification records linked to applications where possible
+
+## Phase 18 Scope
+
+- Protected dashboard summary API backed by real job, resume, application, and notification data
+- Metrics for saved jobs, generated resumes, submitted applications, interviews, assessments, rejections, offers, ghosted applications, match score, response rate, interview rate, and follow-ups due
+- Dashboard charts for application status distribution and recent submitted applications
+- Upcoming reminders loaded from the dashboard summary response

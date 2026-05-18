@@ -208,6 +208,21 @@ Acceptance criteria:
 - Use database transactions for resume version creation plus linked job status updates.
 - Return generic 500 responses without stack traces.
 
-## Phase 20: Background Jobs
+## Phase 20: Deployment
+
+- Add deployment configuration for hosted backend, formatter, PostgreSQL, Redis, and persistent MVP storage.
+- Add Vercel frontend deployment settings.
+- Document required production environment variables.
+- Document database schema sync for the current Prisma MVP.
+- Document production smoke tests for login, job save, raw upload, formatting, download, and application tracking.
+
+## Phase 21: Portfolio Polish
+
+- Rewrite the README for GitHub, resume, and interview use.
+- Add architecture and data-flow diagrams.
+- Add deployment runbook, demo video flow, screenshot checklist, and interview guide.
+- Include the resume bullet and future improvement plan.
+
+## Phase 22: Background Jobs
 
 - Move generation, formatting, PDF export, match analysis, and Gmail scanning into queued jobs.

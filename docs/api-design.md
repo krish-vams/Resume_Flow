@@ -79,3 +79,4 @@ Phase 16 implements Gmail OAuth, job-email scanning, detection review, confirmed
 Phase 17 implements application-linked in-app notifications for follow-ups, interviews, and assessment deadlines.
 Phase 18 implements dashboard analytics with real metrics, simple charts, and upcoming reminders from `GET /api/dashboard/summary`.
 Phase 19 adds in-memory route rate limits for auth, upload, generation, formatting, and PDF export routes without changing the public API contract.
+Phase 20 adds deployment configuration and runbooks without changing the API contract.

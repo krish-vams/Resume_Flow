@@ -1,20 +1,88 @@
 # ResumeFlow OS
 
-ResumeFlow OS is a full-stack dashboard for managing a job application and resume-generation workflow.
+ResumeFlow OS is a full-stack job application dashboard that connects job descriptions, prompt templates, AI-generated raw resumes, DOCX formatting, validation, match analysis, and application tracking in one workflow.
 
-The first MVP supports the current manual flow:
+The MVP supports the manual resume workflow:
 
 ```text
 Job Description -> Gemini Prompt -> Raw Resume DOCX -> Python Formatter -> Final Resume DOCX -> Stored Resume -> Application Tracker
 ```
 
-## Services
+It also includes the foundation for the automated workflow:
 
-- `frontend`: Next.js, React, TypeScript, Tailwind CSS
-- `backend`: Express, TypeScript, Prisma, PostgreSQL, JWT-ready API structure
-- `formatter-service`: FastAPI wrapper for the existing Python DOCX formatter
-- `postgres`: local development database
-- `redis`: local queue dependency for later BullMQ jobs
+```text
+Job Description -> Eligibility Check -> Focus Detection -> Prompt Assembly -> Gemini API -> Validation -> Formatter -> DOCX/PDF Storage -> Application Tracking
+```
+
+## Problem Statement
+
+Applying to many roles creates scattered artifacts: job descriptions, prompts, raw AI outputs, formatted resumes, validation notes, and application statuses. ResumeFlow OS keeps those pieces connected so each generated resume can be traced back to the exact job, prompt, focus strategy, validation report, and application status.
+
+## Features
+
+- User registration, login, HttpOnly JWT auth, and protected routes
+- Candidate profile storage for dynamic resume contact, education, and certification data
+- Job description manager with status tracking, notes, eligibility checks, and JD analysis
+- Prompt library with versioning, duplication, and final prompt assembly
+- Resume focus templates for Java, .NET, Node.js, Golang, AI, Cloud/DevOps, Full Stack, and custom strategies
+- Raw DOCX resume upload with job-linked versioning
+- Python FastAPI formatter service for polished DOCX output
+- Resume validator for summary, bullet count, language, AI tool, skills, bold marker, and header rules
+- Resume library with filters, downloads, validation status, and match score
+- Resume-to-JD match analyzer with missing skill suggestions
+- PDF export through LibreOffice CLI
+- Server-side Gemini API generation
+- Gmail job email detection and user-confirmed status updates
+- Application tracker with follow-ups, interviews, assessments, reminders, and analytics dashboard
+- Security hardening for rate limits, upload validation, ownership checks, private downloads, and production JWT requirements
+
+## Tech Stack
+
+- Frontend: Next.js, React, TypeScript, Tailwind CSS
+- Backend: Node.js, Express, TypeScript, Prisma
+- Formatter: Python, FastAPI, python-docx, LibreOffice CLI
+- Database: PostgreSQL
+- Cache/queues: Redis-ready, BullMQ planned
+- Storage: local private storage for MVP, S3/Supabase Storage planned
+- Deployment-ready targets: Vercel frontend, Render/Railway/AWS backend and formatter, managed Postgres, managed Redis
+
+## Architecture
+
+```mermaid
+flowchart LR
+  User["User"] --> Frontend["Next.js Frontend"]
+  Frontend --> Backend["Express API"]
+  Backend --> Postgres["PostgreSQL"]
+  Backend --> Storage["Private File Storage"]
+  Backend --> Formatter["FastAPI Formatter"]
+  Formatter --> LibreOffice["LibreOffice PDF Export"]
+  Backend --> Gemini["Gemini API"]
+  Backend --> Gmail["Gmail API"]
+  Backend --> Redis["Redis / Future BullMQ Jobs"]
+```
+
+Service details:
+
+- `frontend`: dashboard UI
+- `backend`: auth, APIs, validation, orchestration, metadata, and private downloads
+- `formatter-service`: DOCX parsing/rendering and PDF conversion
+- `postgres`: structured workflow data
+- `redis`: future queue dependency
+
+## Screenshots
+
+Production screenshots should be added under `docs/screenshots` after deployment.
+
+Recommended capture order:
+
+1. Dashboard analytics
+2. Job detail with JD analysis
+3. Prompt library
+4. Resume validation report
+5. Resume library
+6. Application tracker
+
+See `docs/demo-flow.md` for the full demo sequence.
 
 ## Local Setup
 
@@ -24,18 +92,25 @@ Create your local environment file:
 cp .env.example .env
 ```
 
-Install and run the frontend:
+Run infrastructure:
 
 ```bash
-cd frontend
-npm install
-npm run dev
+docker compose up postgres redis
 ```
 
-Install and run the backend:
+Run the backend:
 
 ```bash
 cd backend
+npm install
+npm run prisma:push
+npm run dev
+```
+
+Run the frontend:
+
+```bash
+cd frontend
 npm install
 npm run dev
 ```
@@ -50,191 +125,158 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Run local infrastructure:
-
-```bash
-docker compose up postgres redis
-```
-
-Validate the Prisma schema:
-
-```bash
-cd backend
-npm run prisma:validate
-```
-
-## Health Checks
+Health checks:
 
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:4000/health`
 - Formatter: `http://localhost:8000/health`
-- PostgreSQL: `localhost:5433` when started through Docker Compose
-- Redis: `localhost:6380` when started through Docker Compose
+- PostgreSQL: `localhost:5433`
+- Redis: `localhost:6380`
 
-## Phase 0 Scope
+## Environment Variables
 
-- Monorepo structure
-- Next.js dashboard shell
-- Express backend health route
-- FastAPI formatter health route
-- Prisma schema for core ResumeFlow OS entities
-- Docker Compose for PostgreSQL, Redis, backend, and formatter service
-- Shared environment sample
+Core backend:
 
-## Phase 1 Scope
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `BACKEND_PORT` or hosted platform `PORT`
+- `FRONTEND_URL`
+- `FORMATTER_SERVICE_URL`
+- `REDIS_URL`
+- `STORAGE_PROVIDER`
+- `LOCAL_STORAGE_PATH`
 
-- User registration with hashed passwords
-- User login with JWT issued as an HttpOnly cookie
-- Protected `GET /api/auth/me`
-- Protected candidate profile CRUD
-- Frontend pages for register, login, dashboard, and profile settings
+Frontend:
 
-## Phase 2 Scope
+- `NEXT_PUBLIC_API_URL`
 
-- Protected job description CRUD
-- User-scoped job list and detail pages
-- Job status tracking from saved through offer or withdrawn
-- Job metadata fields for URL, location, type, description, and notes
-- Resume count and future analysis placeholders on job detail
+Formatter:
 
-## Phase 3 Scope
+- `FORMATTER_OUTPUT_DIR`
+- `FORMATTER_MAX_UPLOAD_BYTES`
+- `BASE_RESUME_TEMPLATE_PATH`
 
-- Eligibility gatekeeper service for restricted JD terms
-- Automatic eligibility analysis on job creation and JD updates
-- Protected `POST /api/jobs/:id/analyze-eligibility`
-- Persisted `eligibilityFlagsJson` results on jobs
-- Job detail warnings and blocked resume-generation placeholder
+Optional integrations:
 
-## Phase 4 Scope
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+- `GEMINI_API_BASE_URL`
+- `GMAIL_CLIENT_ID`
+- `GMAIL_CLIENT_SECRET`
+- `GMAIL_REDIRECT_URI`
 
-- Protected prompt template CRUD
-- Prompt edit version increments when prompt text changes
-- Prompt duplication for role-specific variants
-- MVP final prompt assembly from template plus selected job description
-- Frontend prompt library pages with copy-ready final prompt output
+## API Overview
 
-## Phase 5 Scope
+Main API groups:
 
-- Protected resume focus template CRUD
-- Focus types for Java Backend, .NET, Node.js, Golang, AI, Cloud/DevOps, Full Stack, and Custom
-- Local focused resume file upload for MVP
-- Target roles, base resume text, and default skills storage
-- Frontend focus template list, create, and detail/edit pages
+- `/api/auth`: register, login, logout, current user
+- `/api/candidate-profiles`: candidate profile CRUD
+- `/api/jobs`: job CRUD, eligibility analysis, JD analysis
+- `/api/prompts`: prompt CRUD, duplicate, assemble
+- `/api/focus-templates`: resume focus template CRUD and file upload
+- `/api/resumes`: raw upload, generation, validation, formatting, PDF export, downloads, match analysis
+- `/api/applications`: application tracker CRUD
+- `/api/reference-files` and `/api/reference-entries`: Excel reference library upload, parse, search
+- `/api/gmail`: Gmail OAuth, scan, detection review
+- `/api/notifications`: reminders and read state
+- `/api/dashboard/summary`: analytics metrics and charts
 
-## Phase 6 Scope
+Formatter API:
 
-- Keyword-based JD skill extraction
-- Focus recommendation across .NET, Node.js, Golang, AI, Java Backend, Cloud/DevOps, and Full Stack
-- Protected `POST /api/jobs/:id/analyze`
-- Persisted JD keywords, recommendation metadata, and recommended focus template ID
-- Job detail UI for confidence, reason, matched keywords, and manual focus override
+- `POST /format-resume`
+- `POST /export-pdf`
+- `GET /outputs/:fileName`
 
-## Phase 7 Scope
+See `docs/api-design.md`.
 
-- Protected raw resume DOCX upload
-- Resume versions linked to jobs, candidate profiles, prompt templates, and focus templates
-- Per-job version numbering for v1, v2, v3 workflows
-- Private local raw resume storage with authenticated download
-- Job detail UI for uploading, viewing, downloading, and deleting raw resume versions
-- Automatic job status update to `RESUME_GENERATED` after upload
+## Database Schema
 
-## Phase 8 Scope
+Core Prisma models:
 
-- Python DOCX formatter modules for parsing, rendering, schemas, and service orchestration
-- FastAPI `POST /format-resume` endpoint for raw DOCX formatting
-- Structured formatter errors for missing sections, invalid DOCX files, template issues, and write failures
-- Backend `POST /api/resumes/:id/format` integration with the formatter service
-- Private formatted DOCX storage with authenticated final resume download
-- Job detail UI actions for formatting a raw resume and downloading the final DOCX
+- `User`
+- `CandidateProfile`
+- `Job`
+- `PromptTemplate`
+- `ResumeFocusTemplate`
+- `ResumeVersion`
+- `ResumeValidation`
+- `ResumeMatchAnalysis`
+- `Application`
+- `ReferenceFile`
+- `ReferenceEntry`
+- `GmailIntegration`
+- `JobEmail`
+- `EmailDetection`
+- `Notification`
 
-## Phase 9 Scope
+See `docs/database-schema.md`.
 
-- Protected `POST /api/resumes/:id/validate` and `GET /api/resumes/:id/validation`
-- Raw resume validation from pasted text or uploaded DOCX extraction
-- Summary, bullet count, bullet length, programming language, AI term, skills, bold marker, and header checks
-- Stored validation score, status, checklist, and violation metadata
-- Job detail UI action for validating a resume version and reviewing check results
+## Formatter Service
 
-## Phase 10 Scope
+The formatter service accepts a raw DOCX resume plus candidate profile JSON, parses the required sections, preserves bold runs, applies candidate contact and education data, and writes a formatted DOCX. PDF export uses LibreOffice or `soffice` in headless mode.
 
-- Central `/resumes` library for all generated resume versions
-- Filters for company, role, focus type, application status, validation status, and created date range
-- Resume table with version, validation, match score, DOCX download, and PDF placeholder
-- `/resumes/[id]` detail page with raw resume, formatted file state, related JD, prompt, focus template, validation report, match analysis, and application status
+Known formatter errors include missing required sections, invalid DOCX files, missing base templates, write failures, missing LibreOffice, and conversion timeouts.
 
-## Phase 11 Scope
+See `docs/formatter-service.md`.
 
-- Protected application CRUD API
-- Application tracker page at `/applications`
-- Job and resume-version selection for each application
-- Status, applied date, follow-up date, recruiter details, interview date, and notes tracking
-- Linked job status updates when application status changes
+## Validation Rules
 
-## Phase 12 Scope
+The validator checks:
 
-- Protected Excel reference file upload at `/reference-library`
-- Reference categories for action verbs, ATS keywords, examples, impact notes, and rewriting guides
-- XLSX row parsing into searchable reference entries
-- Reference entry list and search APIs
-- Optional selected reference context during prompt assembly
+- Professional Summary presence and target word count
+- Experience bullet counts for expected companies
+- Bullet word counts
+- Multiple core-language violations in one bullet
+- AI tool mentions in restricted experience sections
+- Skills categories, certifications, JD skill coverage, and title case
+- Bold marker usage
+- Candidate header, education, and experience header rules
 
-## Phase 13 Scope
+See `docs/validation-rules.md`.
 
-- Protected `POST /api/resumes/:id/analyze-match`
-- Resume-to-JD comparison using saved JD skills, extracted keywords, stack keyword groups, and ATS reference keywords
-- Saved match score on each resume version
-- Stored detailed match analysis for missing required/preferred skills and category coverage
-- Resume detail UI for running analysis, reviewing gaps, and reading realistic suggestions
+## Deployment
 
-## Phase 14 Scope
+Deployment assets:
 
-- Formatter-service PDF conversion endpoint using LibreOffice CLI
-- Protected `POST /api/resumes/:id/export-pdf`
-- Private PDF storage through `ResumeVersion.formattedPdfUrl`
-- Authenticated `GET /api/resumes/:id/download-pdf`
-- PDF export and download controls in resume detail, resume library, and job detail resume lists
+- `render.yaml`: backend, formatter, PostgreSQL, Redis, and persistent disks
+- `frontend/vercel.json`: frontend build settings
+- `docs/deployment.md`: production setup and smoke-test checklist
 
-## Phase 15 Scope
+Minimum production steps:
 
-- Server-side Gemini API integration using `GEMINI_API_KEY`
-- Protected `POST /api/resumes/generate`
-- Prompt assembly from job, candidate profile, prompt template, and focus template
-- Generated raw resume text and raw DOCX storage
-- Automatic validation after generation
-- Automatic formatting when validation passes or warnings are accepted
-- Job detail button for one-click resume generation
+1. Deploy backend, formatter, database, and Redis.
+2. Set production environment variables.
+3. Run `DATABASE_URL="<production-url>" npm run prisma:deploy` from `backend`.
+4. Deploy `frontend` to Vercel with `NEXT_PUBLIC_API_URL`.
+5. Test login, save JD, upload raw DOCX, format, download, and application tracking.
 
-## Phase 16 Scope
+## Demo Video Flow
 
-- Gmail OAuth connection using backend-only client credentials
-- Encrypted Gmail token storage
-- Protected Gmail scan and detection review APIs
-- Detection for recruiter replies, interviews, assessments, offers, rejections, and application confirmations
-- User confirmation before job or application status changes
-- Gmail review page at `/gmail`
-- Linked Gmail emails shown on job detail pages
+Suggested flow:
 
-## Phase 17 Scope
+1. Login
+2. Add job description
+3. Analyze JD
+4. Copy assembled prompt
+5. Upload raw resume
+6. Validate resume
+7. Format resume
+8. Download final DOCX
+9. Track application status
+10. Show dashboard analytics
 
-- In-app notifications for follow-ups, interviews, and assessment deadlines
-- Application tracker assessment deadline field
-- Automatic reminder sync from application dates
-- Dashboard upcoming reminders panel
-- Mark individual notifications as read
-- Notification records linked to applications where possible
+See `docs/demo-flow.md`.
 
-## Phase 18 Scope
+## Resume Bullet
 
-- Protected dashboard summary API backed by real job, resume, application, and notification data
-- Metrics for saved jobs, generated resumes, submitted applications, interviews, assessments, rejections, offers, ghosted applications, match score, response rate, interview rate, and follow-ups due
-- Dashboard charts for application status distribution and recent submitted applications
-- Upcoming reminders loaded from the dashboard summary response
+Built ResumeFlow OS, a full-stack job application dashboard that stores job descriptions, manages prompt templates, formats AI-generated resumes using a Python DOCX engine, validates ATS rules, and tracks application status across the job search lifecycle.
 
-## Phase 19 Scope
+## Future Improvements
 
-- Rate limits on authentication, upload, generation, formatting, and PDF export routes
-- Stronger upload validation for file size, extension, MIME type, and sanitized stored filenames
-- Production guard that rejects the default or weak `JWT_SECRET`
-- Formatter-service upload size and DOCX extension checks
-- Safer upload cleanup, private generated-file downloads, and transaction-backed resume version creation
-- Generic server errors without stack traces in API responses
+- Replace local file storage with S3 or Supabase Storage and signed download URLs
+- Move long-running generation, formatting, PDF export, match analysis, and Gmail scanning to BullMQ workers
+- Add formal backend integration tests for auth, ownership, upload, format, and download flows
+- Add screenshot automation for portfolio documentation
+- Add production Gmail OAuth verification and richer email classification
+- Add team support, role presets, and analytics drilldowns

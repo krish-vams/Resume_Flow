@@ -8,7 +8,8 @@ const defaultLocalJwtSecret = "change-me-in-local-env";
 const envSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    BACKEND_PORT: z.coerce.number().int().positive().default(4000),
+    PORT: z.coerce.number().int().positive().optional(),
+    BACKEND_PORT: z.coerce.number().int().positive().optional(),
     FRONTEND_URL: z.string().url().default("http://localhost:3000"),
     DATABASE_URL: z.string().min(1).default("postgresql://resumeflow:resumeflow@localhost:5433/resumeflow"),
     JWT_SECRET: z.string().min(1).default(defaultLocalJwtSecret),
@@ -36,6 +37,10 @@ const envSchema = z
         message: "JWT_SECRET must be set to a strong production value"
       });
     }
-  });
+  })
+  .transform((value) => ({
+    ...value,
+    BACKEND_PORT: value.BACKEND_PORT ?? value.PORT ?? 4000
+  }));
 
 export const env = envSchema.parse(process.env);

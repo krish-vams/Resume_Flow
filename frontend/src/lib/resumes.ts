@@ -30,6 +30,36 @@ export type ResumeValidationRecord = {
   createdAt: string;
 };
 
+export type ResumeMatchCoverage = {
+  matched: string[];
+  missing: string[];
+  coverage: number;
+};
+
+export type ResumeMatchAnalysisRecord = {
+  id: string;
+  resumeVersionId: string;
+  matchScore: number;
+  matchedSkillsJson?: string[] | null;
+  matchedRequiredSkillsJson?: string[] | null;
+  missingRequiredSkillsJson?: string[] | null;
+  matchedPreferredSkillsJson?: string[] | null;
+  missingPreferredSkillsJson?: string[] | null;
+  primaryLanguageAlignmentJson?: {
+    primaryLanguage?: string | null;
+    jdLanguages?: string[];
+    resumeLanguages?: string[];
+    aligned?: boolean;
+  } | null;
+  cloudDevopsCoverageJson?: ResumeMatchCoverage | null;
+  databaseCoverageJson?: ResumeMatchCoverage | null;
+  frameworkCoverageJson?: ResumeMatchCoverage | null;
+  referenceKeywordCoverageJson?: ResumeMatchCoverage | null;
+  suggestionsJson?: string[] | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ResumeJobSummary = {
   id: string;
   companyName: string;
@@ -78,6 +108,7 @@ export type ResumeVersionRecord = {
     primaryLanguage?: string | null;
   } | null;
   validation?: ResumeValidationRecord | null;
+  matchAnalysis?: ResumeMatchAnalysisRecord | null;
   createdAt: string;
   updatedAt: string;
 };

@@ -11,6 +11,7 @@ The initial Prisma schema includes:
 - `ReferenceEntry`
 - `ResumeVersion`
 - `ResumeValidation`
+- `ResumeMatchAnalysis`
 - `Application`
 
 The schema favors JSON fields for fast MVP iteration where data structures may change, such as extracted skills, education, certifications, validation reports, and reference metadata.
@@ -76,3 +77,11 @@ Phase 12 uses `ReferenceFile` and `ReferenceEntry` for the resume-writing knowle
 - `ReferenceFile.parsedStatus` tracks pending, parsed, and failed parsing states.
 - `ReferenceEntry.content` stores the searchable row text used by prompt assembly.
 - `tagsJson` and `metadataJson` preserve row tags and original column values for later analysis.
+
+Phase 13 uses `ResumeMatchAnalysis` for stored resume-to-JD alignment results:
+
+- `resumeVersionId` links one saved analysis to each resume version.
+- `matchScore` mirrors the latest score stored on `ResumeVersion.matchScore`.
+- Matched and missing required/preferred skills are stored as JSON arrays.
+- Cloud/DevOps, database, framework, and reference keyword coverage are stored as JSON objects.
+- `suggestionsJson` stores realistic improvement guidance for the resume detail page.

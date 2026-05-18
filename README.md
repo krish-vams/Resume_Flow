@@ -177,3 +177,11 @@ npm run prisma:validate
 - XLSX row parsing into searchable reference entries
 - Reference entry list and search APIs
 - Optional selected reference context during prompt assembly
+
+## Phase 13 Scope
+
+- Protected `POST /api/resumes/:id/analyze-match`
+- Resume-to-JD comparison using saved JD skills, extracted keywords, stack keyword groups, and ATS reference keywords
+- Saved match score on each resume version
+- Stored detailed match analysis for missing required/preferred skills and category coverage
+- Resume detail UI for running analysis, reviewing gaps, and reading realistic suggestions

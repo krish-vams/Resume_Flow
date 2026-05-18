@@ -95,6 +95,26 @@ const resumeSelect = {
       createdAt: true
     }
   },
+  matchAnalysis: {
+    select: {
+      id: true,
+      resumeVersionId: true,
+      matchScore: true,
+      matchedSkillsJson: true,
+      matchedRequiredSkillsJson: true,
+      missingRequiredSkillsJson: true,
+      matchedPreferredSkillsJson: true,
+      missingPreferredSkillsJson: true,
+      primaryLanguageAlignmentJson: true,
+      cloudDevopsCoverageJson: true,
+      databaseCoverageJson: true,
+      frameworkCoverageJson: true,
+      referenceKeywordCoverageJson: true,
+      suggestionsJson: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  },
   createdAt: true,
   updatedAt: true
 };

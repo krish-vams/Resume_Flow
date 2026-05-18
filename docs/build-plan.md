@@ -132,7 +132,15 @@ Acceptance criteria:
 
 ## Phase 13: Resume Match Analysis
 
-- Add basic JD keyword matching.
+- Add protected `POST /api/resumes/:id/analyze-match`.
+- Compare stored JD text against raw resume text or uploaded raw DOCX text.
+- Use required skills, preferred skills, JD extracted keywords, static stack keyword groups, and ATS reference keywords.
+- Save overall match score on `ResumeVersion.matchScore`.
+- Store detailed match results in `ResumeMatchAnalysis`.
+- Display matched and missing required/preferred skills on the resume detail page.
+- Display primary language alignment, cloud/DevOps, database, framework, and reference keyword coverage.
+- Generate clear suggestions that only recommend truthful additions.
+- Keep the resume library match score column backed by the saved score.
 
 ## Phase 14: Direct Gemini Integration
 

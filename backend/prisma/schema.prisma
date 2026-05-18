@@ -210,6 +210,7 @@ model ResumeVersion {
   promptTemplate     PromptTemplate?      @relation(fields: [promptTemplateId], references: [id])
   focusTemplate      ResumeFocusTemplate? @relation(fields: [focusTemplateId], references: [id])
   validation         ResumeValidation?
+  matchAnalysis      ResumeMatchAnalysis?
   applications       Application[]
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
@@ -236,6 +237,26 @@ model ResumeValidation {
   overallStatus              ValidationStatus @default(NOT_RUN)
   resumeVersion              ResumeVersion    @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
   createdAt                  DateTime         @default(now())
+}
+
+model ResumeMatchAnalysis {
+  id                           String        @id @default(cuid())
+  resumeVersionId              String        @unique
+  resumeVersion                ResumeVersion @relation(fields: [resumeVersionId], references: [id], onDelete: Cascade)
+  matchScore                   Int
+  matchedSkillsJson            Json?
+  missingRequiredSkillsJson    Json?
+  matchedRequiredSkillsJson    Json?
+  missingPreferredSkillsJson   Json?
+  matchedPreferredSkillsJson   Json?
+  primaryLanguageAlignmentJson Json?
+  cloudDevopsCoverageJson      Json?
+  databaseCoverageJson         Json?
+  frameworkCoverageJson        Json?
+  referenceKeywordCoverageJson Json?
+  suggestionsJson              Json?
+  createdAt                    DateTime      @default(now())
+  updatedAt                    DateTime      @updatedAt
 }
 
 model Application {

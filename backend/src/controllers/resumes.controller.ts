@@ -13,6 +13,7 @@ import {
   getResumeValidation,
   validateResumeVersion
 } from "../services/resume-validation.service";
+import { analyzeResumeMatch } from "../services/resume-match.service";
 import { uploadRawResumeSchema } from "../validators/resume.validators";
 import { HttpError } from "../utils/http-error";
 
@@ -99,6 +100,14 @@ export async function getResumeValidationRecord(request: Request, response: Resp
   const validation = await getResumeValidation(request.user!.id, getResumeId(request));
 
   response.json({ validation });
+}
+
+export async function analyzeResumeMatchRecord(request: Request, response: Response) {
+  const resumeId = getResumeId(request);
+  const matchAnalysis = await analyzeResumeMatch(request.user!.id, resumeId);
+  const resume = await getResume(request.user!.id, resumeId);
+
+  response.json({ matchAnalysis, resume });
 }
 
 export async function removeResumeRecord(request: Request, response: Response) {

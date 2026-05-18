@@ -10,6 +10,7 @@ import {
   downloadResumeFile,
   formatResumeStatus,
   formatValidationStatus,
+  type ResumeMatchCoverage,
   type ResumeVersionRecord,
 } from "@/lib/resumes";
 
@@ -36,13 +37,38 @@ async function downloadFile(resume: ResumeVersionRecord, kind: "raw" | "formatte
   URL.revokeObjectURL(objectUrl);
 }
 
+function listValues(values: string[] | null | undefined) {
+  return values && values.length > 0 ? values.join(", ") : "None";
+}
+
+function CoverageBlock({ label, coverage }: { label: string; coverage?: ResumeMatchCoverage | null }) {
+  if (!coverage) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium text-[#17212b]">{label}</p>
+        <span className="rounded-md bg-[#eef4f2] px-2 py-1 text-xs font-medium text-[#264653]">
+          {coverage.coverage}%
+        </span>
+      </div>
+      <p className="mt-2 text-sm text-[#2a6f58]">Matched: {listValues(coverage.matched)}</p>
+      <p className="mt-1 text-sm text-[#b42318]">Missing: {listValues(coverage.missing)}</p>
+    </div>
+  );
+}
+
 export default function ResumeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const resumeId = getRouteId(params.id);
   const [resume, setResume] = useState<ResumeVersionRecord | null>(null);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isAnalyzingMatch, setIsAnalyzingMatch] = useState(false);
 
   useEffect(() => {
     if (!resumeId) {
@@ -66,6 +92,28 @@ export default function ResumeDetailPage() {
       await downloadFile(resume, kind);
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to download resume");
+    }
+  }
+
+  async function handleAnalyzeMatch() {
+    if (!resume) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setIsAnalyzingMatch(true);
+
+    try {
+      const response = await apiFetch<{ resume: ResumeVersionRecord }>(`/api/resumes/${resume.id}/analyze-match`, {
+        method: "POST",
+      });
+      setResume(response.resume);
+      setMessage("Match analysis saved");
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to analyze match");
+    } finally {
+      setIsAnalyzingMatch(false);
     }
   }
 
@@ -178,6 +226,7 @@ export default function ResumeDetailPage() {
 
         <aside className="space-y-5">
           {error ? <p className="rounded-md border border-[#f4b5ad] bg-[#fff5f5] p-4 text-sm text-[#b42318]">{error}</p> : null}
+          {message ? <p className="rounded-md border border-[#b7dfc9] bg-[#f2faf5] p-4 text-sm text-[#2a6f58]">{message}</p> : null}
 
           <section className="rounded-md border border-[#d9d6cc] bg-white p-5">
             <h2 className="text-lg font-semibold text-[#17212b]">Resume Files</h2>
@@ -243,11 +292,53 @@ export default function ResumeDetailPage() {
 
           <section className="rounded-md border border-[#d9d6cc] bg-white p-5">
             <h2 className="text-lg font-semibold text-[#17212b]">Match Analysis</h2>
-            <p className="mt-3 text-sm text-[#65707a]">
-              {resume.matchScore === null || resume.matchScore === undefined
-                ? "Match analysis has not been run yet."
-                : `Current match score is ${resume.matchScore}.`}
-            </p>
+            <button
+              className="mt-4 h-10 w-full rounded-md bg-[#264653] px-4 text-sm font-medium text-white hover:bg-[#1f3944] disabled:opacity-60"
+              disabled={isAnalyzingMatch}
+              onClick={handleAnalyzeMatch}
+              type="button"
+            >
+              {isAnalyzingMatch ? "Analyzing..." : "Analyze match"}
+            </button>
+            {resume.matchAnalysis ? (
+              <div className="mt-4 space-y-3">
+                <div className="rounded-md bg-[#eef4f2] p-4">
+                  <p className="text-sm text-[#65707a]">Overall Match Score</p>
+                  <p className="mt-1 text-3xl font-semibold text-[#264653]">{resume.matchAnalysis.matchScore}</p>
+                </div>
+                <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3 text-sm">
+                  <p className="font-medium text-[#17212b]">Required Skills</p>
+                  <p className="mt-2 text-[#2a6f58]">Matched: {listValues(resume.matchAnalysis.matchedRequiredSkillsJson)}</p>
+                  <p className="mt-1 text-[#b42318]">Missing: {listValues(resume.matchAnalysis.missingRequiredSkillsJson)}</p>
+                </div>
+                <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3 text-sm">
+                  <p className="font-medium text-[#17212b]">Preferred Skills</p>
+                  <p className="mt-2 text-[#2a6f58]">Matched: {listValues(resume.matchAnalysis.matchedPreferredSkillsJson)}</p>
+                  <p className="mt-1 text-[#b42318]">Missing: {listValues(resume.matchAnalysis.missingPreferredSkillsJson)}</p>
+                </div>
+                <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3 text-sm">
+                  <p className="font-medium text-[#17212b]">Primary Language</p>
+                  <p className="mt-2 text-[#38434f]">
+                    {resume.matchAnalysis.primaryLanguageAlignmentJson?.primaryLanguage ?? "No primary language detected"} -{" "}
+                    {resume.matchAnalysis.primaryLanguageAlignmentJson?.aligned ? "Aligned" : "Needs review"}
+                  </p>
+                </div>
+                <CoverageBlock coverage={resume.matchAnalysis.cloudDevopsCoverageJson} label="Cloud/DevOps Coverage" />
+                <CoverageBlock coverage={resume.matchAnalysis.databaseCoverageJson} label="Database Coverage" />
+                <CoverageBlock coverage={resume.matchAnalysis.frameworkCoverageJson} label="Framework Coverage" />
+                <CoverageBlock coverage={resume.matchAnalysis.referenceKeywordCoverageJson} label="Reference Keyword Coverage" />
+                <div className="rounded-md border border-[#d9d6cc] bg-[#fdfdfb] p-3">
+                  <p className="text-sm font-medium text-[#17212b]">Suggestions</p>
+                  <ul className="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-[#38434f]">
+                    {(resume.matchAnalysis.suggestionsJson ?? []).map((suggestion) => (
+                      <li key={suggestion}>{suggestion}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-[#65707a]">Match analysis has not been run yet.</p>
+            )}
           </section>
         </aside>
       </section>

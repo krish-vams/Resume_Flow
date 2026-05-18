@@ -10,6 +10,7 @@ import { focusTemplatesRouter } from "./routes/focus-templates.routes";
 import { gmailRouter } from "./routes/gmail.routes";
 import { healthRouter } from "./routes/health.routes";
 import { jobsRouter } from "./routes/jobs.routes";
+import { notificationsRouter } from "./routes/notifications.routes";
 import { promptsRouter } from "./routes/prompts.routes";
 import {
   referenceEntriesRouter,
@@ -39,6 +40,7 @@ app.use("/api/candidate-profiles", candidateProfilesRouter);
 app.use("/api/focus-templates", focusTemplatesRouter);
 app.use("/api/gmail", gmailRouter);
 app.use("/api/jobs", jobsRouter);
+app.use("/api/notifications", notificationsRouter);
 app.use("/api/prompts", promptsRouter);
 app.use("/api/reference-files", referenceFilesRouter);
 app.use("/api/reference-entries", referenceEntriesRouter);

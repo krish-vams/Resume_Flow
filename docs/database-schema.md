@@ -16,6 +16,7 @@ The initial Prisma schema includes:
 - `GmailIntegration`
 - `JobEmail`
 - `EmailDetection`
+- `Notification`
 
 The schema favors JSON fields for fast MVP iteration where data structures may change, such as extracted skills, education, certifications, validation reports, and reference metadata.
 
@@ -95,3 +96,11 @@ Phase 16 uses Gmail tables for job-email tracking:
 - `JobEmail` stores likely job-related Gmail messages and optional links to saved jobs.
 - `EmailDetection` stores the detected email type, suggested status, confidence, and user decision.
 - Confirming a detection can update the linked job and application status; ignored detections are retained for auditability.
+
+Phase 17 uses `Notification` for in-app reminders:
+
+- `applicationId` links reminders to applications when possible.
+- `type` stores follow-up, interview, or assessment reminder categories.
+- `dueAt` powers upcoming reminder views on the dashboard.
+- `read` lets users clear reminders without deleting the audit trail.
+- `Application.assessmentDueDate` supports assessment deadline reminders.

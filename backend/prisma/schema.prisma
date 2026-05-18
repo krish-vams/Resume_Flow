@@ -63,6 +63,7 @@ model User {
   applications         Application[]
   gmailIntegration     GmailIntegration?
   jobEmails            JobEmail[]
+  notifications        Notification[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 }
@@ -273,15 +274,38 @@ model Application {
   recruiterName   String?
   recruiterEmail  String?
   interviewDate   DateTime?
+  assessmentDueDate DateTime?
   notes           String?
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   job             Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
   resumeVersion   ResumeVersion? @relation(fields: [resumeVersionId], references: [id])
+  notifications    Notification[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
   @@index([userId, status])
   @@index([followUpDate])
+  @@index([interviewDate])
+  @@index([assessmentDueDate])
+}
+
+model Notification {
+  id            String       @id @default(cuid())
+  userId        String
+  applicationId String?
+  title         String
+  message       String
+  type          String
+  read          Boolean      @default(false)
+  dueAt         DateTime?
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([applicationId, type])
+  @@index([userId, read, dueAt])
+  @@index([applicationId])
 }
 
 model GmailIntegration {

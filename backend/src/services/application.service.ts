@@ -1,6 +1,7 @@
 import type { JobStatus } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 import { HttpError } from "../utils/http-error";
+import { syncApplicationNotifications } from "./notification.service";
 
 type ApplicationInput = {
   jobId?: string;
@@ -11,6 +12,7 @@ type ApplicationInput = {
   recruiterName?: string | null;
   recruiterEmail?: string | null;
   interviewDate?: string | null;
+  assessmentDueDate?: string | null;
   notes?: string | null;
 };
 
@@ -25,6 +27,7 @@ const applicationSelect = {
   recruiterName: true,
   recruiterEmail: true,
   interviewDate: true,
+  assessmentDueDate: true,
   notes: true,
   job: {
     select: {
@@ -99,6 +102,7 @@ function serializeApplicationInput(input: ApplicationInput) {
     ...(input.recruiterName !== undefined ? { recruiterName: input.recruiterName || null } : {}),
     ...(input.recruiterEmail !== undefined ? { recruiterEmail: input.recruiterEmail || null } : {}),
     ...(input.interviewDate !== undefined ? { interviewDate: toDate(input.interviewDate) } : {}),
+    ...(input.assessmentDueDate !== undefined ? { assessmentDueDate: toDate(input.assessmentDueDate) } : {}),
     ...(input.notes !== undefined ? { notes: input.notes || null } : {})
   };
 }
@@ -117,6 +121,7 @@ export async function createApplication(userId: string, input: Required<Pick<App
       recruiterName: input.recruiterName,
       recruiterEmail: input.recruiterEmail,
       interviewDate: toDate(input.interviewDate),
+      assessmentDueDate: toDate(input.assessmentDueDate),
       notes: input.notes
     },
     select: applicationSelect
@@ -128,6 +133,8 @@ export async function createApplication(userId: string, input: Required<Pick<App
       data: { status: input.status }
     });
   }
+
+  await syncApplicationNotifications(application.id);
 
   return application;
 }
@@ -176,6 +183,8 @@ export async function updateApplication(userId: string, applicationId: string, i
       data: { status: input.status }
     });
   }
+
+  await syncApplicationNotifications(application.id);
 
   return application;
 }

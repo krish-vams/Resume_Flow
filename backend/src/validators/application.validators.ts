@@ -22,6 +22,7 @@ export const createApplicationSchema = z.object({
     message: "Recruiter email must be valid"
   }),
   interviewDate: optionalDateString,
+  assessmentDueDate: optionalDateString,
   notes: optionalString
 });
 

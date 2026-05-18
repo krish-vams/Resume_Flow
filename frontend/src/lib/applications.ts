@@ -24,6 +24,7 @@ export type ApplicationRecord = {
   recruiterName?: string | null;
   recruiterEmail?: string | null;
   interviewDate?: string | null;
+  assessmentDueDate?: string | null;
   notes?: string | null;
   job: {
     id: string;

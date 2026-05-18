@@ -39,6 +39,9 @@ Initial route groups:
 - `POST /api/gmail/detections/:id/confirm`
 - `POST /api/gmail/detections/:id/ignore`
 - `GET /api/gmail/jobs/:id/emails`
+- `GET /api/notifications`
+- `POST /api/notifications/:id/read`
+- `POST /api/notifications/mark-all-read`
 - `POST /api/resumes/upload-raw`
 - `POST /api/resumes/generate`
 - `GET /api/resumes`
@@ -72,3 +75,4 @@ Phase 13 implements resume-to-JD match analysis, saved match scores, missing ski
 Phase 14 implements PDF export from formatted DOCX files through the formatter service and authenticated PDF downloads.
 Phase 15 implements server-side Gemini resume generation with automatic raw resume storage, validation, and formatting.
 Phase 16 implements Gmail OAuth, job-email scanning, detection review, confirmed status updates, and job-detail email visibility.
+Phase 17 implements application-linked in-app notifications for follow-ups, interviews, and assessment deadlines.

@@ -213,3 +213,12 @@ npm run prisma:validate
 - User confirmation before job or application status changes
 - Gmail review page at `/gmail`
 - Linked Gmail emails shown on job detail pages
+
+## Phase 17 Scope
+
+- In-app notifications for follow-ups, interviews, and assessment deadlines
+- Application tracker assessment deadline field
+- Automatic reminder sync from application dates
+- Dashboard upcoming reminders panel
+- Mark individual notifications as read
+- Notification records linked to applications where possible

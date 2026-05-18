@@ -79,6 +79,7 @@ export default function ApplicationsPage() {
       recruiterName: emptyToNull(formData.get("recruiterName")),
       recruiterEmail: emptyToNull(formData.get("recruiterEmail")),
       interviewDate: emptyToNull(formData.get("interviewDate")),
+      assessmentDueDate: emptyToNull(formData.get("assessmentDueDate")),
       notes: emptyToNull(formData.get("notes")),
     };
 
@@ -255,6 +256,15 @@ export default function ApplicationsPage() {
               />
             </label>
             <label className="block text-sm font-medium">
+              Assessment Deadline
+              <input
+                className="mt-1 h-10 w-full rounded-md border border-[#cfcabf] px-3 outline-none focus:border-[#264653]"
+                defaultValue={dateInputValue(editingApplication?.assessmentDueDate)}
+                name="assessmentDueDate"
+                type="date"
+              />
+            </label>
+            <label className="block text-sm font-medium">
               Notes
               <textarea
                 className="mt-1 min-h-28 w-full rounded-md border border-[#cfcabf] px-3 py-2 outline-none focus:border-[#264653]"
@@ -298,6 +308,7 @@ export default function ApplicationsPage() {
                   <th className="px-4 py-3 font-medium">Follow-Up</th>
                   <th className="px-4 py-3 font-medium">Recruiter</th>
                   <th className="px-4 py-3 font-medium">Interview</th>
+                  <th className="px-4 py-3 font-medium">Assessment</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -336,6 +347,7 @@ export default function ApplicationsPage() {
                       )}
                     </td>
                     <td className="px-4 py-3">{application.interviewDate ? formatDate(application.interviewDate) : "None"}</td>
+                    <td className="px-4 py-3">{application.assessmentDueDate ? formatDate(application.assessmentDueDate) : "None"}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
@@ -358,7 +370,7 @@ export default function ApplicationsPage() {
                 ))}
                 {applications.length === 0 ? (
                   <tr>
-                    <td className="px-4 py-10 text-center text-[#65707a]" colSpan={9}>
+                    <td className="px-4 py-10 text-center text-[#65707a]" colSpan={10}>
                       No applications tracked yet.
                     </td>
                   </tr>

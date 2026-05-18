@@ -178,6 +178,16 @@ Acceptance criteria:
 - Show important linked emails in each job detail page.
 - Add `/gmail` for connection, scanning, review, confirm, and ignore actions.
 
-## Phase 17: Background Jobs
+## Phase 17: Notifications and Follow-Up Reminders
+
+- Add `Notification` records linked to users and optional applications.
+- Add assessment deadline tracking on applications.
+- Automatically sync follow-up, interview, and assessment notifications from application dates.
+- Add protected notification list and mark-read routes.
+- Show upcoming reminders on the dashboard.
+- Allow users to mark notifications as read.
+- Show assessment deadline fields in the application tracker.
+
+## Phase 18: Background Jobs
 
 - Move generation, formatting, PDF export, match analysis, and Gmail scanning into queued jobs.

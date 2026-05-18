@@ -45,6 +45,7 @@ export default function JobDetailPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [formattingResumeId, setFormattingResumeId] = useState<string | null>(null);
   const [validatingResumeId, setValidatingResumeId] = useState<string | null>(null);
+  const [exportingPdfResumeId, setExportingPdfResumeId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) {
@@ -200,7 +201,7 @@ export default function JobDetailPage() {
     }
   }
 
-  async function downloadResumeFile(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
+  async function downloadResumeFile(resume: ResumeVersionRecord, kind: "raw" | "formatted" | "pdf") {
     setError("");
     setMessage("");
 
@@ -217,7 +218,9 @@ export default function JobDetailPage() {
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
-      link.download = `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}${kind === "formatted" ? "-formatted" : ""}-v${resume.version}.docx`;
+      const suffix = kind === "formatted" || kind === "pdf" ? "-formatted" : "";
+      const extension = kind === "pdf" ? "pdf" : "docx";
+      link.download = `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}${suffix}-v${resume.version}.${extension}`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -247,6 +250,29 @@ export default function JobDetailPage() {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to format resume");
     } finally {
       setFormattingResumeId(null);
+    }
+  }
+
+  async function handleExportPdf(resume: ResumeVersionRecord) {
+    setError("");
+    setMessage("");
+    setExportingPdfResumeId(resume.id);
+
+    try {
+      const response = await apiFetch<{ resume: ResumeVersionRecord; downloadUrl: string }>(
+        `/api/resumes/${resume.id}/export-pdf`,
+        { method: "POST" }
+      );
+      setResumes((currentResumes) =>
+        currentResumes.map((currentResume) =>
+          currentResume.id === response.resume.id ? response.resume : currentResume
+        )
+      );
+      setMessage(`PDF export for v${response.resume.version} is ready`);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to export PDF");
+    } finally {
+      setExportingPdfResumeId(null);
     }
   }
 
@@ -464,6 +490,11 @@ export default function JobDetailPage() {
                           Formatted DOCX ready
                         </p>
                       ) : null}
+                      {resume.formattedPdfUrl ? (
+                        <p className="mt-1 text-sm font-medium text-[#2a6f58]">
+                          PDF ready
+                        </p>
+                      ) : null}
                       {resume.validation ? (
                         <p
                           className={`mt-1 text-sm font-medium ${
@@ -529,6 +560,22 @@ export default function JobDetailPage() {
                         type="button"
                       >
                         Final
+                      </button>
+                      <button
+                        className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white disabled:opacity-60"
+                        disabled={!resume.formattedDocxUrl || exportingPdfResumeId === resume.id}
+                        onClick={() => handleExportPdf(resume)}
+                        type="button"
+                      >
+                        {exportingPdfResumeId === resume.id ? "Exporting..." : "Export PDF"}
+                      </button>
+                      <button
+                        className="h-9 rounded-md border border-[#cfcabf] px-3 text-sm font-medium hover:bg-white disabled:opacity-60"
+                        disabled={!resume.formattedPdfUrl}
+                        onClick={() => downloadResumeFile(resume, "pdf")}
+                        type="button"
+                      >
+                        PDF
                       </button>
                       <button
                         className="h-9 rounded-md border border-[#b42318] px-3 text-sm font-medium text-[#b42318] hover:bg-[#fff5f5]"

@@ -36,3 +36,10 @@ class FormatResult(BaseModel):
     fileName: Optional[str] = None
     formattedDocxPath: Optional[str] = None
     errors: list[str] = Field(default_factory=list)
+
+
+class PdfExportResult(BaseModel):
+    status: str
+    fileName: Optional[str] = None
+    formattedPdfPath: Optional[str] = None
+    errors: list[str] = Field(default_factory=list)

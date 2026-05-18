@@ -125,9 +125,12 @@ export function formatValidationStatus(status: string) {
   return formatResumeStatus(status);
 }
 
-export function downloadResumeFile(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
+export function downloadResumeFile(resume: ResumeVersionRecord, kind: "raw" | "formatted" | "pdf") {
+  const suffix = kind === "formatted" || kind === "pdf" ? "-formatted" : "";
+  const extension = kind === "pdf" ? "pdf" : "docx";
+
   return {
     path: `/api/resumes/${resume.id}/download-${kind}`,
-    fileName: `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}${kind === "formatted" ? "-formatted" : ""}-v${resume.version}.docx`,
+    fileName: `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}${suffix}-v${resume.version}.${extension}`,
   };
 }

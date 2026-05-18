@@ -36,7 +36,7 @@ function isString(value: string | null | undefined): value is string {
   return typeof value === "string" && value.length > 0;
 }
 
-async function downloadFile(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
+async function downloadFile(resume: ResumeVersionRecord, kind: "raw" | "formatted" | "pdf") {
   const target = downloadResumeFile(resume, kind);
   const response = await fetch(`${API_URL}${target.path}`, { credentials: "include" });
 
@@ -103,7 +103,7 @@ export default function ResumesPage() {
     setFilters((currentFilters) => ({ ...currentFilters, [key]: value }));
   }
 
-  async function handleDownload(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
+  async function handleDownload(resume: ResumeVersionRecord, kind: "raw" | "formatted" | "pdf") {
     setError("");
 
     try {
@@ -276,7 +276,8 @@ export default function ResumesPage() {
                   <td className="px-4 py-3">
                     <button
                       className="h-9 rounded-md border border-[#cfcabf] px-3 font-medium disabled:opacity-60"
-                      disabled
+                      disabled={!resume.formattedPdfUrl}
+                      onClick={() => handleDownload(resume, "pdf")}
                       type="button"
                     >
                       PDF

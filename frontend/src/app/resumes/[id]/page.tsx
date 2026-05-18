@@ -18,7 +18,7 @@ function getRouteId(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-async function downloadFile(resume: ResumeVersionRecord, kind: "raw" | "formatted") {
+async function downloadFile(resume: ResumeVersionRecord, kind: "raw" | "formatted" | "pdf") {
   const target = downloadResumeFile(resume, kind);
   const response = await fetch(`${API_URL}${target.path}`, { credentials: "include" });
 
@@ -69,6 +69,7 @@ export default function ResumeDetailPage() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzingMatch, setIsAnalyzingMatch] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   useEffect(() => {
     if (!resumeId) {
@@ -81,7 +82,7 @@ export default function ResumeDetailPage() {
       .finally(() => setIsLoading(false));
   }, [resumeId, router]);
 
-  async function handleDownload(kind: "raw" | "formatted") {
+  async function handleDownload(kind: "raw" | "formatted" | "pdf") {
     if (!resume) {
       return;
     }
@@ -92,6 +93,28 @@ export default function ResumeDetailPage() {
       await downloadFile(resume, kind);
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to download resume");
+    }
+  }
+
+  async function handleExportPdf() {
+    if (!resume) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setIsExportingPdf(true);
+
+    try {
+      const response = await apiFetch<{ resume: ResumeVersionRecord }>(`/api/resumes/${resume.id}/export-pdf`, {
+        method: "POST",
+      });
+      setResume(response.resume);
+      setMessage("PDF export is ready");
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to export PDF");
+    } finally {
+      setIsExportingPdf(false);
     }
   }
 
@@ -153,6 +176,14 @@ export default function ResumeDetailPage() {
               type="button"
             >
               Formatted DOCX
+            </button>
+            <button
+              className="h-10 rounded-md border border-[#cfcabf] px-4 text-sm font-medium hover:bg-[#f7f7f4] disabled:opacity-60"
+              disabled={!resume.formattedPdfUrl}
+              onClick={() => handleDownload("pdf")}
+              type="button"
+            >
+              PDF
             </button>
           </div>
         </div>
@@ -244,6 +275,22 @@ export default function ResumeDetailPage() {
                 <dd className="font-medium text-[#17212b]">{resume.formattedPdfUrl ? "Available" : "Not generated"}</dd>
               </div>
             </dl>
+            <button
+              className="mt-4 h-10 w-full rounded-md border border-[#cfcabf] px-4 text-sm font-medium hover:bg-[#f7f7f4] disabled:opacity-60"
+              disabled={!resume.formattedDocxUrl || isExportingPdf}
+              onClick={handleExportPdf}
+              type="button"
+            >
+              {isExportingPdf ? "Exporting..." : "Export PDF"}
+            </button>
+            <button
+              className="mt-3 h-10 w-full rounded-md bg-[#264653] px-4 text-sm font-medium text-white hover:bg-[#1f3944] disabled:bg-[#9ca3af]"
+              disabled={!resume.formattedPdfUrl}
+              onClick={() => handleDownload("pdf")}
+              type="button"
+            >
+              Download PDF
+            </button>
           </section>
 
           <section className="rounded-md border border-[#d9d6cc] bg-white p-5">

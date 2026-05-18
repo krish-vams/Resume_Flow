@@ -185,3 +185,11 @@ npm run prisma:validate
 - Saved match score on each resume version
 - Stored detailed match analysis for missing required/preferred skills and category coverage
 - Resume detail UI for running analysis, reviewing gaps, and reading realistic suggestions
+
+## Phase 14 Scope
+
+- Formatter-service PDF conversion endpoint using LibreOffice CLI
+- Protected `POST /api/resumes/:id/export-pdf`
+- Private PDF storage through `ResumeVersion.formattedPdfUrl`
+- Authenticated `GET /api/resumes/:id/download-pdf`
+- PDF export and download controls in resume detail, resume library, and job detail resume lists

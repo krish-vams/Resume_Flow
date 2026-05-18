@@ -3,8 +3,8 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from app.formatter.schemas import FormatResult
-from app.formatter.service import OUTPUT_DIR, format_resume
+from app.formatter.schemas import FormatResult, PdfExportResult
+from app.formatter.service import OUTPUT_DIR, export_pdf, format_resume
 
 app = FastAPI(
     title="ResumeFlow Formatter Service",
@@ -27,6 +27,14 @@ async def format_resume_endpoint(
     return await format_resume(raw_resume_file, candidate_profile_json, output_name)
 
 
+@app.post("/export-pdf", response_model=PdfExportResult)
+async def export_pdf_endpoint(
+    formatted_docx_file: UploadFile = File(...),
+    output_name: str = Form(...),
+) -> PdfExportResult:
+    return await export_pdf(formatted_docx_file, output_name)
+
+
 @app.get("/outputs/{file_name}")
 def download_output(file_name: str) -> FileResponse:
     output_root = OUTPUT_DIR.resolve()
@@ -40,8 +48,10 @@ def download_output(file_name: str) -> FileResponse:
     if not output_path.exists():
         raise HTTPException(status_code=404, detail="Formatted DOCX not found")
 
-    return FileResponse(
-        output_path,
-        filename=file_name,
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    media_type = (
+        "application/pdf"
+        if output_path.suffix.lower() == ".pdf"
+        else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+    return FileResponse(output_path, filename=file_name, media_type=media_type)

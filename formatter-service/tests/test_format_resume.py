@@ -91,3 +91,27 @@ def test_format_resume_reports_missing_sections(client, tmp_path):
     assert payload["status"] == "error"
     assert "Missing Experience" in payload["errors"]
     assert "Missing Skills" in payload["errors"]
+
+
+def test_export_pdf_reports_missing_libreoffice(client, tmp_path, monkeypatch):
+    monkeypatch.setattr("app.formatter.service.shutil.which", lambda _name: None)
+    formatted_path = tmp_path / "formatted.docx"
+    Document().save(formatted_path)
+
+    with formatted_path.open("rb") as formatted_file:
+        response = client.post(
+            "/export-pdf",
+            data={"output_name": "Resume"},
+            files={
+                "formatted_docx_file": (
+                    "formatted.docx",
+                    formatted_file,
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            },
+        )
+
+    payload = response.json()
+    assert response.status_code == 200
+    assert payload["status"] == "error"
+    assert payload["errors"] == ["LibreOffice CLI not found"]

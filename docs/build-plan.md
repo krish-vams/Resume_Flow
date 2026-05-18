@@ -142,7 +142,19 @@ Acceptance criteria:
 - Generate clear suggestions that only recommend truthful additions.
 - Keep the resume library match score column backed by the saved score.
 
-## Phase 14: Direct Gemini Integration
+## Phase 14: PDF Export
+
+- Add formatter-service `POST /export-pdf` using LibreOffice or `soffice` in headless mode.
+- Add backend `POST /api/resumes/:id/export-pdf`.
+- Require an existing formatted DOCX before PDF export.
+- Store generated PDFs in private local storage.
+- Update `ResumeVersion.formattedPdfUrl` after successful export.
+- Add authenticated `GET /api/resumes/:id/download-pdf`.
+- Show PDF export and download actions on resume detail and job detail pages.
+- Enable PDF download from the resume library when a PDF exists.
+- Return clear errors when LibreOffice is missing or conversion fails.
+
+## Phase 15: Direct Gemini Integration
 
 - Add Gemini API integration.
 - Run generation, validation, formatting, and storage as one workflow.

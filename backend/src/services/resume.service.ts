@@ -22,6 +22,13 @@ type FormatterResponse = {
   errors?: string[];
 };
 
+type PdfExportResponse = {
+  status: "success" | "error";
+  fileName?: string;
+  formattedPdfPath?: string;
+  errors?: string[];
+};
+
 const resumeSelect = {
   id: true,
   userId: true,
@@ -167,6 +174,15 @@ async function updateFormattingFailure(resumeId: string, message: string) {
     where: { id: resumeId },
     data: {
       status: `Formatting Failed: ${message}`.slice(0, 180)
+    }
+  });
+}
+
+async function updatePdfExportFailure(resumeId: string, message: string) {
+  await prisma.resumeVersion.update({
+    where: { id: resumeId },
+    data: {
+      status: `PDF Export Failed: ${message}`.slice(0, 180)
     }
   });
 }
@@ -410,6 +426,103 @@ export async function getFormattedResumeDownload(userId: string, resumeId: strin
   };
 }
 
+export async function exportResumePdf(userId: string, resumeId: string) {
+  const resume = await getResume(userId, resumeId);
+
+  if (!resume.formattedDocxUrl) {
+    throw new HttpError(400, "Formatted DOCX is required before PDF export");
+  }
+
+  let formattedDocxBuffer: Buffer;
+
+  try {
+    formattedDocxBuffer = await fs.readFile(resolveStorageKey(resume.formattedDocxUrl));
+  } catch {
+    const message = "Formatted DOCX file not found";
+    await updatePdfExportFailure(resume.id, message);
+    throw new HttpError(404, message);
+  }
+
+  const formattedDocxBytes = new Uint8Array(formattedDocxBuffer.length);
+  formattedDocxBytes.set(formattedDocxBuffer);
+  const formData = new FormData();
+  const outputName = `${resume.resumeName}-formatted-v${resume.version}`;
+  formData.set(
+    "formatted_docx_file",
+    new Blob([formattedDocxBytes], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    }),
+    `${outputName}.docx`
+  );
+  formData.set("output_name", outputName);
+
+  let exportPayload: PdfExportResponse;
+
+  try {
+    const exportResponse = await fetch(`${env.FORMATTER_SERVICE_URL}/export-pdf`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!exportResponse.ok) {
+      throw new Error(exportResponse.statusText || "Formatter service failed");
+    }
+
+    exportPayload = (await exportResponse.json()) as PdfExportResponse;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Formatter service unavailable";
+    await updatePdfExportFailure(resume.id, message);
+    throw new HttpError(502, message);
+  }
+
+  if (exportPayload.status !== "success" || !exportPayload.fileName) {
+    const message = exportPayload.errors?.join(", ") || "Formatter service returned a PDF export error";
+    await updatePdfExportFailure(resume.id, message);
+    throw new HttpError(422, message, exportPayload.errors);
+  }
+
+  try {
+    const pdfResponse = await fetch(`${env.FORMATTER_SERVICE_URL}/outputs/${encodeURIComponent(exportPayload.fileName)}`);
+
+    if (!pdfResponse.ok) {
+      throw new Error("Unable to download PDF from formatter service");
+    }
+
+    const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+    const pdfUploadPath = path.resolve(env.LOCAL_STORAGE_PATH, "formatted-pdfs", userId);
+    await fs.mkdir(pdfUploadPath, { recursive: true });
+    const pdfFileName = `${Date.now()}-${exportPayload.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+    const pdfPath = path.join(pdfUploadPath, pdfFileName);
+    await fs.writeFile(pdfPath, pdfBuffer);
+
+    return prisma.resumeVersion.update({
+      where: { id: resume.id },
+      data: {
+        formattedPdfUrl: toStorageKey(pdfPath),
+        status: "PDF Exported"
+      },
+      select: resumeSelect
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to store PDF";
+    await updatePdfExportFailure(resume.id, message);
+    throw new HttpError(502, message);
+  }
+}
+
+export async function getPdfResumeDownload(userId: string, resumeId: string) {
+  const resume = await getResume(userId, resumeId);
+
+  if (!resume.formattedPdfUrl) {
+    throw new HttpError(404, "Formatted PDF file not found");
+  }
+
+  return {
+    absolutePath: resolveStorageKey(resume.formattedPdfUrl),
+    filename: `${resume.resumeName.replace(/[^a-zA-Z0-9._-]/g, "-")}-formatted-v${resume.version}.pdf`
+  };
+}
+
 export async function deleteResume(userId: string, resumeId: string) {
   const resume = await getResume(userId, resumeId);
 
@@ -427,6 +540,14 @@ export async function deleteResume(userId: string, resumeId: string) {
 
   if (resume.formattedDocxUrl) {
     await fs.unlink(resolveStorageKey(resume.formattedDocxUrl)).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    });
+  }
+
+  if (resume.formattedPdfUrl) {
+    await fs.unlink(resolveStorageKey(resume.formattedPdfUrl)).catch((error: NodeJS.ErrnoException) => {
       if (error.code !== "ENOENT") {
         throw error;
       }

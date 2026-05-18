@@ -2,7 +2,9 @@ import { Router } from "express";
 import {
   analyzeResumeMatchRecord,
   downloadFormattedResumeRecord,
+  downloadPdfResumeRecord,
   downloadRawResumeRecord,
+  exportResumePdfRecord,
   formatResumeRecord,
   getResumeValidationRecord,
   getResumeRecord,
@@ -22,7 +24,9 @@ resumesRouter.post("/upload-raw", uploadRawResumeFile.single("rawResumeFile"), a
 resumesRouter.get("/", asyncHandler(listResumeRecords));
 resumesRouter.get("/:id/download-raw", asyncHandler(downloadRawResumeRecord));
 resumesRouter.get("/:id/download-formatted", asyncHandler(downloadFormattedResumeRecord));
+resumesRouter.get("/:id/download-pdf", asyncHandler(downloadPdfResumeRecord));
 resumesRouter.post("/:id/format", asyncHandler(formatResumeRecord));
+resumesRouter.post("/:id/export-pdf", asyncHandler(exportResumePdfRecord));
 resumesRouter.post("/:id/validate", asyncHandler(validateResumeRecord));
 resumesRouter.post("/:id/analyze-match", asyncHandler(analyzeResumeMatchRecord));
 resumesRouter.get("/:id/validation", asyncHandler(getResumeValidationRecord));

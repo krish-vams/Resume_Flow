@@ -1,5 +1,7 @@
 # Build Plan
 
+This file records the detailed implementation phases. For the recommended MVP product sequencing and four-week delivery roadmap, see `docs/mvp-roadmap.md`.
+
 ## Phase 0: Repository Setup and Development Environment
 
 Goal: create a clean monorepo with runnable frontend, backend, formatter service, database, and cache boundaries.

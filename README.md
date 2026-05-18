@@ -268,6 +268,17 @@ Suggested flow:
 
 See `docs/demo-flow.md`.
 
+## MVP Roadmap
+
+The recommended product build order is documented in `docs/mvp-roadmap.md`.
+
+High-level sequence:
+
+1. Immediate workflow automation: auth, profile, jobs, raw upload, formatter, storage, download
+2. Workflow organization: prompts, focus templates, resume library, application tracker
+3. Intelligence layer: eligibility, focus detection, validation, match analysis, reference library
+4. Full automation: Gemini API, PDF export, Gmail, notifications, analytics
+
 ## Resume Bullet
 
 Built ResumeFlow OS, a full-stack job application dashboard that stores job descriptions, manages prompt templates, formats AI-generated resumes using a Python DOCX engine, validates ATS rules, and tracks application status across the job search lifecycle.
